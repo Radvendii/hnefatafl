@@ -1,5 +1,6 @@
 \documentclass[11pt, oneside]{article}
 \usepackage{latexrc}
+\usepackage{hyperref}
 
 \title{CS3110 Final Project Proposal}
 \author{Taeer Bar-Yam (tb442) \and Elizabeth VanDenburgh (eav38) \and Joseph
@@ -23,7 +24,13 @@ Programming an interactive Hnefatafl game.
 The game is played on an $11\times 11$ checkered board with two uneven sides.
 $12$ white pieces are positioned around a white ``king'' at the center of the
 board, with $24$ black pieces arranged on the edges surrounding them.
-% include graphic
+See~\ref{fig:initial_position}.
+\begin{figure}
+  \label{fig:initial_position}
+  \centering
+    \scalebox{.5}{\includegraphics{hnefatafl}}
+    \caption{Hnefatafl starting board position. Source: \url{https://medium.com/war-is-boring/you-have-to-play-this-1-600-year-old-viking-war-game-cef088ae4e2d\#.10kof827g}}
+\end{figure}
 There are three main mechanics involved in the game: 
 \begin{enumerate}
 \item \textbf{Movement}\\
@@ -43,7 +50,7 @@ There are three main mechanics involved in the game:
   back to the center square of the board.\\
   White wins when the king is moved to one of the side squares of the board.
 \end{enumerate}
-See: %link to wikipedia
+See: \url{https://en.wikipedia.org/wiki/Tafl\_games\#Hnefatafl}
 \subsection{Interface:}
 Ultimately we would like to implement the interface as a GUI using openGL, and
 allow click-and-drag motion commands. Initially, we will implement a text-based

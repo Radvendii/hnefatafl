@@ -7,5 +7,8 @@
     "latex2e"
     "article"
     "art11"
-    "latexrc")))
+    "latexrc"
+    "hyperref")
+   (LaTeX-add-labels
+    "fig:initial_position")))
 
