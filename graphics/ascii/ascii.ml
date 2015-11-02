@@ -23,34 +23,39 @@ let prod l1 l2 =
 
 module type GUI = sig
   (* [runGUI b movef] runs the GUI with b as the initial board configuration
-   *                  and movef as the callback. Where:
-   * [movef p c1 c2]  returns the board that results from the user attempting to
-   *                  move the piece [p] at position [c1] to position [c2].
+   *                  and movef as the callback.
+   * Where:
+   * [movef c1 c2]    returns the board that results from the user attempting to
+   *                  move the piece at position [c1] to position [c2].
    *                  This attempt needn't necessarily succeed. *)
-  val runGUI : board -> (piece -> coord -> coord -> board) -> unit
+  val runGUI : board -> (coord -> coord -> board) -> unit
 end
 
 module AsciiGUI : GUI = struct
-  let move_cursor =
-    let cursor = ref (0,0) in
-    fun x -> fun y ->
-      cursor := (fst !cursor + x), (snd !cursor + y);
-      set_cursor (fst !cursor) (snd !cursor);
-      ()
+  type action =
+    | MoveC  of coord
+    | Select of coord 
+    | Move   of (coord * coord)
+    | Quit
+    | Nop
 
-  let keypress_callback c =
+  type state = { cursor   : coord
+               ; selected : coord option
+               }
+
+  let keypress_callback c s =
+    let (cx,cy) = s.cursor in
     match c with
-    | 'h' -> move_cursor (-1) 0 ;true
-    | 'j' -> move_cursor 0 1    ;true
-    | 'k' -> move_cursor 0 (-1) ;true
-    | 'l' -> move_cursor 1 0    ;true
-    | 'q' ->                     false
-    | _   ->                     true
-
-  let rec loop_while f =
-    match f () with
-    | true  -> loop_while f
-    | false -> ()
+    | 'h' -> MoveC(cx-1, cy)
+    | 'j' -> MoveC(cx,   cy+1)
+    | 'k' -> MoveC(cx,   cy-1)
+    | 'l' -> MoveC(cx+1, cy)
+    | 'q' -> Quit
+    | ' ' ->
+      (match s.selected with
+       | None -> Select(cx,cy)
+       | Some(sx, sy) -> Move((sx,sy),(cx,cy)))
+    | _   -> Nop
 
   let draw_board b =
     (* draw the border *)
@@ -71,16 +76,34 @@ module AsciiGUI : GUI = struct
         b.pieces in
     ()
 
+  let rec loop_while f s =
+    match f s with
+    | s', true -> loop_while f s'
+    | _, false -> ()
+
   let runGUI b movef =
     let _ = init () in
     draw_board b ;
     present () ;
-    loop_while (fun () ->
+    loop_while (fun s ->
         match poll_event () with
-        | Key _ | Utf8 _ | Resize _ -> true
+        | Key _ | Utf8 _ | Resize _ -> s, true
         | Ascii c ->
-          let b = keypress_callback c in
-          present () ; b) ; (* this part is ugly. TODO: Make this cleaner*)
+          match keypress_callback c s with
+          | MoveC(x, y) ->
+            set_cursor x y
+          ; present ()
+          ; {s with cursor = (x,y)}, true
+          | Select(x, y) ->
+            {s with selected = Some (x,y)}, true
+          | Move(c1,c2) ->
+            clear ()
+          ; draw_board @@ movef c1 c2
+          ; present ()
+          ; {s with selected = None}, true
+          | Nop -> s, true
+          | Quit -> s, false)
+      {cursor = (0,0); selected = None} ;
     shutdown () ;
     ()
 end
@@ -107,4 +130,5 @@ let init =
       @
       [[WKing, (6,6)]]
   }
-let _ = runGUI init (fun p c1 c2 -> init) (* Do nothing function for now. *)
+
+let () = runGUI init (fun c1 c2 -> { init with pieces = [WKing, (6,6)]})
