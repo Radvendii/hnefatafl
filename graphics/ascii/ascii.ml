@@ -34,15 +34,15 @@ module AsciiGUI : GUI = struct
   let draw_board b =
     (* draw the border *)
     let () = List.iter
-        (fun y ->
-           set_cell_char 0 y '|';
-           set_cell_char (snd b.dims + 1) y '|')
-        (0--(fst b.dims + 1)) in
-    let () = List.iter
         (fun x ->
            set_cell_char x 0 '-';
            set_cell_char x (fst b.dims + 1) '-')
         (0--(snd b.dims + 1)) in
+    let () = List.iter
+        (fun y ->
+           set_cell_char 0 y '|';
+           set_cell_char (snd b.dims + 1) y '|')
+        (0--(fst b.dims + 1)) in
     (* draw the pieces *)
     let () = List.iter
         (fun (p,c) ->
