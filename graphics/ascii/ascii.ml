@@ -1,4 +1,4 @@
-open Curses
+open Termbox
 
 type coord = int * int
 type piece = BPawn | WPawn | WKing
@@ -31,37 +31,31 @@ module type GUI = sig
 end
 
 module AsciiGUI : GUI = struct
-  let putch i1 i2 c =
-    let (x,y) = getyx (stdscr ()) in
-    let _ = mvaddch i1 i2 (int_of_char c) in
-    let _ = move x y in
-    ()
-
   let draw_board b =
     (* draw the border *)
     let () = List.iter
         (fun y ->
-           putch y 0 '|';
-           putch y (snd b.dims + 1) '|')
+           set_cell_char 0 y '|';
+           set_cell_char (snd b.dims + 1) y '|')
         (0--(fst b.dims + 1)) in
     let () = List.iter
         (fun x ->
-           putch 0 x '-';
-           putch (fst b.dims + 1) x '-')
+           set_cell_char x 0 '-';
+           set_cell_char x (fst b.dims + 1) '-')
         (0--(snd b.dims + 1)) in
     (* draw the pieces *)
     let () = List.iter
         (fun (p,c) ->
-           putch (snd c) (fst c) (char_of_piece p))
+           set_cell_char (snd c) (fst c) (char_of_piece p))
         b.pieces in
     ()
 
-  let runGUI init movef =
-    let _ = initscr () in
-    let _ = draw_board init in
-    let _  = refresh () in
+  let runGUI b movef =
+    let _ = init () in
+    let _ = draw_board b in
+    let _  = present () in
     let _ = Unix.sleep 5 in
-    let _ = endwin () in
+    let _ = shutdown () in
     ()
 end
 
