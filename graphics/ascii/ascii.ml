@@ -31,6 +31,27 @@ module type GUI = sig
 end
 
 module AsciiGUI : GUI = struct
+  let move_cursor =
+    let cursor = ref (0,0) in
+    fun x -> fun y ->
+      cursor := (fst !cursor + x), (snd !cursor + y);
+      set_cursor (fst !cursor) (snd !cursor);
+      ()
+
+  let keypress_callback c =
+    match c with
+    | 'h' -> move_cursor (-1) 0 ;true
+    | 'j' -> move_cursor 0 1    ;true
+    | 'k' -> move_cursor 0 (-1) ;true
+    | 'l' -> move_cursor 1 0    ;true
+    | 'q' ->                     false
+    | _   ->                     true
+
+  let rec loop_while f =
+    match f () with
+    | true  -> loop_while f
+    | false -> ()
+
   let draw_board b =
     (* draw the border *)
     let () = List.iter
@@ -52,10 +73,15 @@ module AsciiGUI : GUI = struct
 
   let runGUI b movef =
     let _ = init () in
-    let _ = draw_board b in
-    let _  = present () in
-    let _ = Unix.sleep 5 in
-    let _ = shutdown () in
+    draw_board b ;
+    present () ;
+    loop_while (fun () ->
+        match poll_event () with
+        | Key _ | Utf8 _ | Resize _ -> true
+        | Ascii c ->
+          let b = keypress_callback c in
+          present () ; b) ; (* this part is ugly. TODO: Make this cleaner*)
+    shutdown () ;
     ()
 end
 
