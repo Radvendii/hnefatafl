@@ -21,8 +21,16 @@ let (--) i j =
 let prod l1 l2 =
   List.flatten @@ List.map (fun x -> List.map (fun y -> (x,y)) l2) l1
 
-module AsciiGUI = struct
+module type GUI = sig
+  (* [runGUI b movef] runs the GUI with b as the initial board configuration
+   *                  and movef as the callback. Where:
+   * [movef p c1 c2]  returns the board that results from the user attempting to
+   *                  move the piece [p] at position [c1] to position [c2].
+   *                  This attempt needn't necessarily succeed. *)
+  val runGUI : board -> (piece -> coord -> coord -> board) -> unit
+end
 
+module AsciiGUI : GUI = struct
   let putch i1 i2 c =
     let (x,y) = getyx (stdscr ()) in
     let _ = mvaddch i1 i2 (int_of_char c) in
@@ -59,10 +67,11 @@ end
 
 open AsciiGUI
 
+(* TODO? read in inital positions and rules from textfile *)
 let init =
   { dims = (11,11)
   ; pieces =
-      List.flatten @@
+      List.flatten @@ (* TODO: this double-list is a bit of a kludge; fix it.*)
       List.map (List.map (fun c -> BPawn, c))
         [ (prod (4--8) [1;11])
         ; (prod [1;11] (4--8))
@@ -78,4 +87,4 @@ let init =
       @
       [[WKing, (6,6)]]
   }
-let _ = runGUI init (fun x -> x)
+let _ = runGUI init (fun p c1 c2 -> init) (* Do nothing function for now. *)
