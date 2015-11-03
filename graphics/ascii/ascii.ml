@@ -95,6 +95,12 @@ module AsciiGUI : GUI = struct
     | s', true -> loop_while f s'
     | _, false -> ()
 
+  let in_range (xd,yd) (x,y) =
+    0 < x   &&
+    0 < y   &&
+    x <= xd &&
+    y <= yd
+
   let runGUI b movef =
     let _ = init () in
     draw_board b ;
@@ -102,9 +108,11 @@ module AsciiGUI : GUI = struct
     loop_while (fun s ->
         match action_of_event (poll_event ()) s with
         | MoveC(x, y) ->
-          set_cursor x y
-        ; present ()
-        ; {s with cursor = (x,y)}, true
+          if in_range s.board.dims (x,y)
+          then (set_cursor x y
+               ; present ()
+               ; {s with cursor = (x,y)}, true)
+          else s, true
         | Select(x, y) ->
           {s with selected = Some (x,y)}, true
         | Move(c1,c2) ->
@@ -115,7 +123,7 @@ module AsciiGUI : GUI = struct
         ; {s with selected = None; board}, true
         | Nop -> s, true
         | Quit -> s, false)
-      {board = b; cursor = (0,0); selected = None} ;
+      {board = b; cursor = (1,1); selected = None} ;
     shutdown () ;
     ()
 end
@@ -131,13 +139,15 @@ let init =
         [ (prod (4--8) [1;11])
         ; (prod [1;11] (4--8))
         ; (prod [2;10] [6])
-        ; (prod [6] [2;10])]
+        ; (prod [6] [2;10])
+        ]
 
       @
       List.map (List.map (fun c -> WPawn, c))
         [ (prod (5--7) (5--7))
         ; (prod [4;8] [6])
-        ; (prod [6] [4;8])]
+        ; (prod [6] [4;8])
+        ]
 
       @
       [[WKing, (6,6)]]
