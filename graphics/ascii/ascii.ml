@@ -166,6 +166,6 @@ let () = runGUI init (fun b c1 c2 ->
         let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
         let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
         match p1 with
-        | None -> ps'
-        | Some(p1') -> (fst p1', c2)::ps'
+        | None -> ps (* if someone tries to move nothing, nothing happens*)
+        | Some(p1') -> (fst p1', c2)::ps' (* move the piece!*)
     })
