@@ -47,19 +47,29 @@ module AsciiGUI : GUI = struct
                                    * it out. *)
                }
 
-  let keypress_callback c s =
+  let action_of_event e s =
     let (cx,cy) = s.cursor in
-    match c with
-    | 'h' -> MoveC(cx-1, cy)
-    | 'j' -> MoveC(cx,   cy+1)
-    | 'k' -> MoveC(cx,   cy-1)
-    | 'l' -> MoveC(cx+1, cy)
-    | 'q' -> Quit
-    | ' ' ->
-      (match s.selected with
-       | None -> Select(cx,cy)
-       | Some(sx, sy) -> Move((sx,sy),(cx,cy)))
-    | _   -> Nop
+    match e with
+    | Utf8 _ | Resize _ -> Nop
+    | Key k ->
+      (match k with
+       | Arrow_left  -> MoveC(cx-1, cy)
+       | Arrow_down  -> MoveC(cx,   cy+1)
+       | Arrow_up    -> MoveC(cx,   cy-1)
+       | Arrow_right -> MoveC(cx+1, cy)
+       | _ -> Nop)
+    | Ascii c ->
+      (match c with
+       | 'h' -> MoveC(cx-1, cy)
+       | 'j' -> MoveC(cx,   cy+1)
+       | 'k' -> MoveC(cx,   cy-1)
+       | 'l' -> MoveC(cx+1, cy)
+       | 'q' -> Quit
+       | ' ' ->
+         (match s.selected with
+          | None -> Select(cx,cy)
+          | Some(sx, sy) -> Move((sx,sy),(cx,cy)))
+       | _   -> Nop)
 
   let draw_board b =
     (* draw the border *)
@@ -90,24 +100,21 @@ module AsciiGUI : GUI = struct
     draw_board b ;
     present () ;
     loop_while (fun s ->
-        match poll_event () with
-        | Key _ | Utf8 _ | Resize _ -> s, true
-        | Ascii c ->
-          match keypress_callback c s with
-          | MoveC(x, y) ->
-            set_cursor x y
-          ; present ()
-          ; {s with cursor = (x,y)}, true
-          | Select(x, y) ->
-            {s with selected = Some (x,y)}, true
-          | Move(c1,c2) ->
-            let board = movef s.board c1 c2 in
-            clear ()
-          ; draw_board @@ board
-          ; present ()
-          ; {s with selected = None; board}, true
-          | Nop -> s, true
-          | Quit -> s, false)
+        match action_of_event (poll_event ()) s with
+        | MoveC(x, y) ->
+          set_cursor x y
+        ; present ()
+        ; {s with cursor = (x,y)}, true
+        | Select(x, y) ->
+          {s with selected = Some (x,y)}, true
+        | Move(c1,c2) ->
+          let board = movef s.board c1 c2 in
+          clear ()
+        ; draw_board @@ board
+        ; present ()
+        ; {s with selected = None; board}, true
+        | Nop -> s, true
+        | Quit -> s, false)
       {board = b; cursor = (0,0); selected = None} ;
     shutdown () ;
     ()
