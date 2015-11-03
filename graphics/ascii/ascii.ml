@@ -11,6 +11,8 @@ type board = {
   dims   : int * int;
   pieces : (piece * coord) list
 }
+let piece_at c b =
+  fst @@ List.find (fun (_,c') -> c' = c) b.pieces
 
 (* http://stackoverflow.com/questions/243864/what-is-the-ocaml-idiom-equivalent-to-pythons-range-function *)
 let (--) i j =
@@ -114,7 +116,8 @@ module AsciiGUI : GUI = struct
                ; {s with cursor = (x,y)}, true)
           else s, true
         | Select(x, y) ->
-          {s with selected = Some (x,y)}, true
+          set_cell_char ~bg:Blue x y (char_of_piece @@ piece_at (x,y) s.board) (* TODO: dekludge *)
+        ; {s with selected = Some (x,y)}, true
         | Move(c1,c2) ->
           let board = movef s.board c1 c2 in
           clear ()
