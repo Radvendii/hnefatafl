@@ -28,7 +28,7 @@ module type GUI = sig
    * [movef c1 c2]    returns the board that results from the user attempting to
    *                  move the piece at position [c1] to position [c2].
    *                  This attempt needn't necessarily succeed. *)
-  val runGUI : board -> (coord -> coord -> board) -> unit
+  val runGUI : board -> (board -> coord -> coord -> board) -> unit
 end
 
 module AsciiGUI : GUI = struct
@@ -41,6 +41,10 @@ module AsciiGUI : GUI = struct
 
   type state = { cursor   : coord
                ; selected : coord option
+               ; board    : board (* TODO: I am not satisfied with needing to
+                                   * keep the board as state in the graphics
+                                   * part of the program; let's try to factor
+                                   * it out. *)
                }
 
   let keypress_callback c s =
@@ -72,7 +76,7 @@ module AsciiGUI : GUI = struct
     (* draw the pieces *)
     let () = List.iter
         (fun (p,c) ->
-           set_cell_char (snd c) (fst c) (char_of_piece p))
+           set_cell_char (fst c) (snd c) (char_of_piece p))
         b.pieces in
     ()
 
@@ -97,13 +101,14 @@ module AsciiGUI : GUI = struct
           | Select(x, y) ->
             {s with selected = Some (x,y)}, true
           | Move(c1,c2) ->
+            let board = movef s.board c1 c2 in
             clear ()
-          ; draw_board @@ movef c1 c2
+          ; draw_board @@ board
           ; present ()
-          ; {s with selected = None}, true
+          ; {s with selected = None; board}, true
           | Nop -> s, true
           | Quit -> s, false)
-      {cursor = (0,0); selected = None} ;
+      {board = b; cursor = (0,0); selected = None} ;
     shutdown () ;
     ()
 end
@@ -131,4 +136,19 @@ let init =
       [[WKing, (6,6)]]
   }
 
-let () = runGUI init (fun c1 c2 -> { init with pieces = [WKing, (6,6)]})
+let rec pop_find f = function
+  | [] -> [], None
+  | x::xs ->
+    if f x
+    then (xs, Some x)
+    else let (xs', x') = pop_find f xs in (x::xs', x')
+
+let () = runGUI init (fun b c1 c2 ->
+    { b with
+      pieces =
+        let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+        let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+        match p1 with
+        | None -> ps'
+        | Some(p1') -> (fst p1', c2)::ps'
+    })
