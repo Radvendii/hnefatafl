@@ -11,8 +11,13 @@ type board = {
   dims   : int * int;
   pieces : (piece * coord) list
 }
-let piece_at c b =
-  fst @@ List.find (fun (_,c') -> c' = c) b.pieces
+let rec piece_at c b =
+  match b.pieces with
+  | [] -> None
+  | (p,c')::ps ->
+    if c' = c
+    then Some(p)
+    else piece_at c {b with pieces = ps}
 
 (* http://stackoverflow.com/questions/243864/what-is-the-ocaml-idiom-equivalent-to-pythons-range-function *)
 let (--) i j =
@@ -116,7 +121,10 @@ module AsciiGUI : GUI = struct
                ; {s with cursor = (x,y)}, true)
           else s, true
         | Select(x, y) ->
-          set_cell_char ~bg:Blue x y (char_of_piece @@ piece_at (x,y) s.board) (* TODO: dekludge *)
+          set_cell_char ~bg:Blue x y
+            (match piece_at (x,y) s.board with
+             | None -> ' '
+             | Some p -> char_of_piece p)
         ; {s with selected = Some (x,y)}, true
         | Move(c1,c2) ->
           let board = movef s.board c1 c2 in
