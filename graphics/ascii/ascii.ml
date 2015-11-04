@@ -66,7 +66,7 @@ module AsciiGUI : GUI = struct
        | 'j' -> MoveC(cx,   cy+1)
        | 'k' -> MoveC(cx,   cy-1)
        | 'l' -> MoveC(cx+1, cy)
-       | 'q' -> Quit
+       | 'q' | '\x1B' -> Quit
        | ' ' ->
          (match s.selected with
           | None -> Select(cx,cy)
