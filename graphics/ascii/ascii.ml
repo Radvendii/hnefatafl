@@ -1,5 +1,3 @@
-open Termbox
-
 type coord = int * int
 type piece = BPawn | WPawn | WKing
 let char_of_piece = function
@@ -28,6 +26,23 @@ let (--) i j =
 let prod l1 l2 =
   List.flatten @@ List.map (fun x -> List.map (fun y -> (x,y)) l2) l1
 
+type guiaction =
+  | GUIMoveC  of coord
+  | GUISelect of coord
+  | GUIMove   of (coord * coord)
+  | GUIQuit
+  | GUINop
+
+type action =
+  | Quit
+  | Move of (coord * coord)
+  | Nop
+
+  let rec loop_while f s =
+    match f s with
+    | `Cont(s') -> loop_while f s'
+    | `Break(v) -> v
+
 module type GUI = sig
   (* [runGUI b movef] runs the GUI with b as the initial board configuration
    *                  and movef as the callback.
@@ -35,72 +50,106 @@ module type GUI = sig
    * [movef c1 c2]    returns the board that results from the user attempting to
    *                  move the piece at position [c1] to position [c2].
    *                  This attempt needn't necessarily succeed. *)
-  val runGUI : board -> (board -> coord -> coord -> board) -> unit
+  (* val runGUI : board -> (board -> coord -> coord -> board) -> unit *)
+  val init : unit -> unit
+  val deinit : unit -> unit
+  val draw_board : board -> unit
+  val user_input : unit -> action
 end
 
+  (* type state = { cursor   : coord *)
+  (*              ; selected : coord option *)
+  (*              ; board    : board (\* TODO: I am not satisfied with needing to *)
+  (*                                  * keep the board as state in the graphics *)
+  (*                                  * part of the program; let's try to factor *)
+  (*                                  * it out. *\) *)
+  (*              }
+ *)
 module AsciiGUI : GUI = struct
-  type action =
-    | MoveC  of coord
-    | Select of coord 
-    | Move   of (coord * coord)
-    | Quit
-    | Nop
+  module Termbox' = struct
+    (* HERE BE DRAGONS *)
+    include Termbox
+    let screen_w = 400
+    let screen_h = 400
+    let out_of_bounds (x,y) =
+      not
+      (0 <= x       &&
+       0 <= y       &&
+       x < screen_w &&
+       y < screen_h)
+    let screen = Array.make_matrix screen_w screen_h None
+    let cursor = ref((1,1))
+    let set_cursor x y =
+      cursor := (x,y) ;
+      Termbox.set_cursor x y
+    let get_cursor () = !cursor
+    let set_cell_char ?fg:(fg=Default) ?bg:(bg=Default) x y c =
+      if out_of_bounds (x,y)
+      then failwith "out of bounds"
+      else ( set_cell_char ~fg:fg ~bg:bg x y c
+           ; screen.(x).(y) <- Some c
+           )
+    let get_cell_char x y = screen.(x).(y)
 
-  type state = { cursor   : coord
-               ; selected : coord option
-               ; board    : board (* TODO: I am not satisfied with needing to
-                                   * keep the board as state in the graphics
-                                   * part of the program; let's try to factor
-                                   * it out. *)
-               }
+    let clear () =
+      Termbox.clear ();
+      for x = 0 to screen_w - 1 do
+        for y = 0 to screen_h - 1 do
+          screen.(x).(y) <- None
+        done
+      done
+  end
 
-  let action_of_event e s =
-    let (cx,cy) = s.cursor in
+  open Termbox'
+
+  type guistate = {selected : coord option}
+
+  let init () = let _ = init () in ()
+  let deinit = shutdown
+
+  let guiaction_of_event e s =
+    let (cx,cy) = get_cursor () in
     match e with
-    | Utf8 _ | Resize _ -> Nop
+    | Utf8 _ | Resize _ -> GUINop
     | Key k ->
       (match k with
-       | Arrow_left  -> MoveC(cx-1, cy)
-       | Arrow_down  -> MoveC(cx,   cy+1)
-       | Arrow_up    -> MoveC(cx,   cy-1)
-       | Arrow_right -> MoveC(cx+1, cy)
-       | _ -> Nop)
+       | Arrow_left  -> GUIMoveC(cx-1, cy)
+       | Arrow_down  -> GUIMoveC(cx,   cy+1)
+       | Arrow_up    -> GUIMoveC(cx,   cy-1)
+       | Arrow_right -> GUIMoveC(cx+1, cy)
+       | _ -> GUINop)
     | Ascii c ->
       (match c with
-       | 'h' -> MoveC(cx-1, cy)
-       | 'j' -> MoveC(cx,   cy+1)
-       | 'k' -> MoveC(cx,   cy-1)
-       | 'l' -> MoveC(cx+1, cy)
-       | 'q' | '\x1B' -> Quit
+       | 'h' -> GUIMoveC(cx-1, cy)
+       | 'j' -> GUIMoveC(cx,   cy+1)
+       | 'k' -> GUIMoveC(cx,   cy-1)
+       | 'l' -> GUIMoveC(cx+1, cy)
+       | 'q' | '\x1B' -> GUIQuit
        | ' ' ->
          (match s.selected with
-          | None -> Select(cx,cy)
-          | Some(sx, sy) -> Move((sx,sy),(cx,cy)))
-       | _   -> Nop)
+          | None -> GUISelect(cx,cy)
+          | Some(sx, sy) -> GUIMove((sx,sy),(cx,cy)))
+       | _   -> GUINop)
 
   let draw_board b =
     (* draw the border *)
-    let () = List.iter
-        (fun x ->
-           set_cell_char x 0 '-';
-           set_cell_char x (fst b.dims + 1) '-')
-        (0--(snd b.dims + 1)) in
-    let () = List.iter
-        (fun y ->
-           set_cell_char 0 y '|';
-           set_cell_char (snd b.dims + 1) y '|')
-        (0--(fst b.dims + 1)) in
+    clear () ;
+    List.iter
+      (fun x ->
+         set_cell_char x 0 '-';
+         set_cell_char x (fst b.dims + 1) '-')
+      (0--(snd b.dims + 1)) ;
+    List.iter
+      (fun y ->
+         set_cell_char 0 y '|';
+         set_cell_char (snd b.dims + 1) y '|')
+      (0--(fst b.dims + 1)) ;
     (* draw the pieces *)
-    let () = List.iter
-        (fun (p,c) ->
-           set_cell_char (fst c) (snd c) (char_of_piece p))
-        b.pieces in
-    ()
-
-  let rec loop_while f s =
-    match f s with
-    | s', true -> loop_while f s'
-    | _, false -> ()
+    List.iter
+      (fun (p,c) ->
+         set_cell_char (fst c + 1) (snd c + 1) (char_of_piece p)) (* shift by one to avoid border *)
+      b.pieces ;
+    present ()
 
   let in_range (xd,yd) (x,y) =
     0 < x   &&
@@ -108,60 +157,56 @@ module AsciiGUI : GUI = struct
     x <= xd &&
     y <= yd
 
-  let runGUI b movef =
-    let _ = init () in
-    draw_board b ;
-    present () ;
+  let user_input () =
     loop_while (fun s ->
-        match action_of_event (poll_event ()) s with
-        | MoveC(x, y) ->
-          if in_range s.board.dims (x,y)
+        match guiaction_of_event (poll_event ()) s with
+        | GUIMoveC(x, y) ->
+          if not @@ List.mem (get_cell_char x y) [Some('|'); Some('-')] (* don't allow movement onto the border *)
           then (set_cursor x y
                ; present ()
-               ; {s with cursor = (x,y)}, true)
-          else s, true
-        | Select(x, y) ->
+               ; `Cont(s))
+          else `Cont(s)
+        | GUISelect(x, y) ->
           set_cell_char ~bg:Blue x y
-            (match piece_at (x,y) s.board with
+            (match get_cell_char x y with
              | None -> ' '
-             | Some p -> char_of_piece p)
-        ; {s with selected = Some (x,y)}, true
-        | Move(c1,c2) ->
-          let board = movef s.board c1 c2 in
-          clear ()
-        ; draw_board @@ board
-        ; present ()
-        ; {s with selected = None; board}, true
-        | Nop -> s, true
-        | Quit -> s, false)
-      {board = b; cursor = (1,1); selected = None} ;
-    shutdown () ;
-    ()
+             | Some c -> c)
+        ; `Cont({selected = Some (x,y)})
+        | GUIMove((x1,y1),(x2,y2)) ->
+          set_cell_char x1 y1
+            (match get_cell_char x1 y1 with
+             | None -> ' '
+             | Some c -> c) (* reset the color *)
+        ; `Break(Move((x1-1,y1-1),(x2-1,y2-1)))
+        | GUINop -> `Cont(s)
+        | GUIQuit -> `Break(Quit))
+      {selected = None}
+
 end
 
 open AsciiGUI
 
 (* TODO? read in inital positions and rules from textfile *)
-let init =
+let init_board =
   { dims = (11,11)
   ; pieces =
       List.flatten @@ (* TODO: this double-list is a bit of a kludge; fix it.*)
       List.map (List.map (fun c -> BPawn, c))
-        [ (prod (4--8) [1;11])
-        ; (prod [1;11] (4--8))
-        ; (prod [2;10] [6])
-        ; (prod [6] [2;10])
+        [ (prod (3--7) [0;10])
+        ; (prod [0;10] (3--7))
+        ; (prod [1;9] [5])
+        ; (prod [5] [1;9])
         ]
 
       @
       List.map (List.map (fun c -> WPawn, c))
-        [ (prod (5--7) (5--7))
-        ; (prod [4;8] [6])
-        ; (prod [6] [4;8])
+        [ (prod (4--6) (4--6))
+        ; (prod [3;7] [5])
+        ; (prod [5] [3;7])
         ]
 
       @
-      [[WKing, (6,6)]]
+      [[WKing, (5,5)]]
   }
 
 let rec pop_find f = function
@@ -171,12 +216,21 @@ let rec pop_find f = function
     then (xs, Some x)
     else let (xs', x') = pop_find f xs in (x::xs', x')
 
-let () = runGUI init (fun b c1 c2 ->
-    { b with
-      pieces =
-        let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-        let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-        match p1 with
-        | None -> ps (* if someone tries to move nothing, nothing happens*)
-        | Some(p1') -> (fst p1', c2)::ps' (* move the piece!*)
-    })
+let () =
+  init () ;
+  loop_while (fun b ->
+      draw_board b ;
+      match user_input () with
+      | Move(c1, c2) ->
+        (`Cont { b with
+                 pieces =
+                   let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+                   let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+                   match p1 with
+                   | None -> ps (* if someone tries to move nothing, nothing happens*)
+                   | Some(p1') -> (fst p1', c2)::ps' (* move the piece!*)
+               })
+      | Quit -> `Break(())
+      | Nop -> `Cont(b)
+    ) init_board ;
+  deinit ()
