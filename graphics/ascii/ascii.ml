@@ -37,27 +37,12 @@ let rec loop_while f s =
   | `Break(v) -> v
 
 module type GUI = sig
-  (* [runGUI b movef] runs the GUI with b as the initial board configuration
-   *                  and movef as the callback.
-   * Where:
-   * [movef c1 c2]    returns the board that results from the user attempting to
-   *                  move the piece at position [c1] to position [c2].
-   *                  This attempt needn't necessarily succeed. *)
-  (* val runGUI : board -> (board -> coord -> coord -> board) -> unit *)
   val init : unit -> unit
   val deinit : unit -> unit
   val draw_board : board -> unit
   val user_input : unit -> action
 end
 
-  (* type state = { cursor   : coord *)
-  (*              ; selected : coord option *)
-  (*              ; board    : board (\* TODO: I am not satisfied with needing to *)
-  (*                                  * keep the board as state in the graphics *)
-  (*                                  * part of the program; let's try to factor *)
-  (*                                  * it out. *\) *)
-  (*              }
- *)
 module AsciiGUI : GUI = struct
   module Termbox' = struct
     (* HERE BE DRAGONS *)
