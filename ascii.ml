@@ -1,50 +1,8 @@
-type coord = int * int
-type piece = BPawn | WPawn | WKing
-let char_of_piece = function
-  | BPawn -> 'X'
-  | WPawn -> 'O'
-  | WKing -> '@'
-
-type board = {
-  dims   : int * int;
-  pieces : (piece * coord) list
-}
-let rec piece_at c b =
-  match b.pieces with
-  | [] -> None
-  | (p,c')::ps ->
-    if c' = c
-    then Some(p)
-    else piece_at c {b with pieces = ps}
-
-(* http://stackoverflow.com/questions/243864/what-is-the-ocaml-idiom-equivalent-to-pythons-range-function *)
-let (--) i j =
-  let rec aux n acc =
-    if n < i then acc else aux (n-1) (n :: acc)
-  in aux j [] ;;
-
-let prod l1 l2 =
-  List.flatten @@ List.map (fun x -> List.map (fun y -> (x,y)) l2) l1
-
-type action =
-  | Quit
-  | Move of (coord * coord)
-  | Nop
-
-let rec loop_while f s =
-  match f s with
-  | `Cont(s') -> loop_while f s'
-  | `Break(v) -> v
-
-module type GUI = sig
-  val init : unit -> unit
-  val deinit : unit -> unit
-  val draw_board : board -> unit
-  val user_input : unit -> action
-end
+open Game_types
+open GUI
 
 module AsciiGUI : GUI = struct
-  module Termbox' = struct
+  module Termbox' = struct (* extends termbox to keep track of screen, cursor*)
     (* HERE BE DRAGONS *)
     include Termbox
     let screen_w = 400
@@ -63,7 +21,7 @@ module AsciiGUI : GUI = struct
     let get_cursor () = !cursor
     let set_cell_char ?fg:(fg=Default) ?bg:(bg=Default) x y c =
       if out_of_bounds (x,y)
-      then failwith "out of bounds"
+      then failwith "out of bounds" (* TODO: This is kludgy *)
       else ( set_cell_char ~fg:fg ~bg:bg x y c
            ; screen.(x).(y) <- Some c
            )
@@ -168,54 +126,3 @@ module AsciiGUI : GUI = struct
       {selected = None}
 
 end
-
-open AsciiGUI
-
-(* TODO? read in inital positions and rules from textfile *)
-let init_board =
-  { dims = (11,11)
-  ; pieces =
-      List.flatten @@ (* TODO: this double-list is a bit of a kludge; fix it.*)
-      List.map (List.map (fun c -> BPawn, c))
-        [ (prod (3--7) [0;10])
-        ; (prod [0;10] (3--7))
-        ; (prod [1;9] [5])
-        ; (prod [5] [1;9])
-        ]
-
-      @
-      List.map (List.map (fun c -> WPawn, c))
-        [ (prod (4--6) (4--6))
-        ; (prod [3;7] [5])
-        ; (prod [5] [3;7])
-        ]
-
-      @
-      [[WKing, (5,5)]]
-  }
-
-let rec pop_find f = function
-  | [] -> [], None
-  | x::xs ->
-    if f x
-    then (xs, Some x)
-    else let (xs', x') = pop_find f xs in (x::xs', x')
-
-let () =
-  init () ;
-  loop_while (fun b ->
-      draw_board b ;
-      match user_input () with
-      | Move(c1, c2) ->
-        (`Cont { b with
-                 pieces =
-                   let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-                   let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-                   match p1 with
-                   | None -> ps (* if someone tries to move nothing, nothing happens*)
-                   | Some(p1') -> (fst p1', c2)::ps' (* move the piece!*)
-               })
-      | Quit -> `Break(())
-      | Nop -> `Cont(b)
-    ) init_board ;
-  deinit ()
