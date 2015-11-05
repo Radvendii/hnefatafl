@@ -26,22 +26,15 @@ let (--) i j =
 let prod l1 l2 =
   List.flatten @@ List.map (fun x -> List.map (fun y -> (x,y)) l2) l1
 
-type guiaction =
-  | GUIMoveC  of coord
-  | GUISelect of coord
-  | GUIMove   of (coord * coord)
-  | GUIQuit
-  | GUINop
-
 type action =
   | Quit
   | Move of (coord * coord)
   | Nop
 
-  let rec loop_while f s =
-    match f s with
-    | `Cont(s') -> loop_while f s'
-    | `Break(v) -> v
+let rec loop_while f s =
+  match f s with
+  | `Cont(s') -> loop_while f s'
+  | `Break(v) -> v
 
 module type GUI = sig
   (* [runGUI b movef] runs the GUI with b as the initial board configuration
@@ -101,6 +94,13 @@ module AsciiGUI : GUI = struct
   end
 
   open Termbox'
+
+  type guiaction =
+    | GUIMoveC  of coord
+    | GUISelect of coord
+    | GUIMove   of (coord * coord)
+    | GUIQuit
+    | GUINop
 
   type guistate = {selected : coord option}
 
