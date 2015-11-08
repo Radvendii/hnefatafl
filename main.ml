@@ -39,19 +39,30 @@ let step_dir dir (x,y) =
   | Left -> (x-1, y)
   | Right -> (x+1, y)
 
-let closest_pieces (a,b) bd =
-  let contact_pieces_in_yPos = List.filter (fun (_,(x,y)) -> x=a && y>b) bd.pieces in
-  let contact_pieces_in_xPos = List.filter (fun (_,(x,y)) -> y=b && x>a) bd.pieces in
-  let contact_pieces_in_yNeg = List.filter (fun (_,(x,y)) -> x=a && y<b) bd.pieces in
-  let contact_pieces_in_xNeg = List.filter (fun (_,(x,y)) -> y=b && x<a) bd.pieces in
-  let sorted_in_xPos = List.sort (fun (_,(x,_)) (_,(x',_)) -> x-x') contact_pieces_in_xPos in
-  let sorted_in_yPos = List.sort (fun (_,(_,y)) (_,(_,y')) -> y-y') contact_pieces_in_yPos in
-  let sorted_in_xNeg = List.sort (fun (_,(x,_)) (_,(x',_)) -> x'-x) contact_pieces_in_xNeg in
-  let sorted_in_yNeg = List.sort (fun (_,(_,y)) (_,(_,y')) -> y'-y) contact_pieces_in_yNeg in
-  [(if List.len sorted_in_xPos > 0 then Some (List.hd sorted_in_xPos) else None);
-   (if List.len sorted_in_yPos > 0 then Some (List.hd sorted_in_yPos) else None);
-   (if List.len sorted_in_xNeg > 0 then Some (List.hd sorted_in_xNeg) else None);
-   (if List.len sorted_in_yNeg > 0 then Some (List.hd sorted_in_yNeg) else None);]
+(* let closest_pieces (a,b) bd = *)
+(*   let contact_pieces_in_yPos = List.filter (fun (_,(x,y)) -> x=a && y>b) bd.pieces in *)
+(*   let contact_pieces_in_xPos = List.filter (fun (_,(x,y)) -> y=b && x>a) bd.pieces in *)
+(*   let contact_pieces_in_yNeg = List.filter (fun (_,(x,y)) -> x=a && y<b) bd.pieces in *)
+(*   let contact_pieces_in_xNeg = List.filter (fun (_,(x,y)) -> y=b && x<a) bd.pieces in *)
+(*   let sorted_in_xPos = List.sort (fun (_,(x,_)) (_,(x',_)) -> x-x') contact_pieces_in_xPos in *)
+(*   let sorted_in_yPos = List.sort (fun (_,(_,y)) (_,(_,y')) -> y-y') contact_pieces_in_yPos in *)
+(*   let sorted_in_xNeg = List.sort (fun (_,(x,_)) (_,(x',_)) -> x'-x) contact_pieces_in_xNeg in *)
+(*   let sorted_in_yNeg = List.sort (fun (_,(_,y)) (_,(_,y')) -> y'-y) contact_pieces_in_yNeg in *)
+(*   [(if List.len sorted_in_xPos > 0 then Some (List.hd sorted_in_xPos) else None); *)
+(*    (if List.len sorted_in_yPos > 0 then Some (List.hd sorted_in_yPos) else None); *)
+(*    (if List.len sorted_in_xNeg > 0 then Some (List.hd sorted_in_xNeg) else None); *)
+(*    (if List.len sorted_in_yNeg > 0 then Some (List.hd sorted_in_yNeg) else None);] *)
+
+let valid_moves c1 b =
+  let rec helper c2 dir =
+    let c2' = step_dir dir c2 in
+    if in_range b.dims c2' && piece_at c2' b = None
+    then c2'::helper c2' dir
+    else [] in
+  List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
+
+let valid_move c1 c2 b =
+  List.mem c2 (valid_moves c1 b)
 
 (*let valid_move_space (p:piece) ((a,b):coord) (bd:board) : coord list =
   let contact_pieces = closest_pieces (a,b) bd in
@@ -79,7 +90,10 @@ let () =
                    let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
                    match p1 with
                    | None -> ps (* if someone tries to move nothing, nothing happens*)
-                   | Some(p1') -> (fst p1', c2)::ps' (* move the piece!*)
+                   | Some(p1') ->
+                     if valid_move c1 c2 b (* if it's a valid move*)
+                     then (fst p1', c2)::ps' (* move the piece!*)
+                     else b.pieces (* otherwise do nothing *)
                })
       | Quit -> `Break(())
       | Nop -> `Cont(b)
