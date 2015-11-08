@@ -7,17 +7,17 @@ let init_board =
   ; pieces =
       List.flatten @@ (* TODO: this double-list is a bit of a kludge; fix it.*)
       List.map (List.map (fun c -> BPawn, c))
-        [ (prod (3--7) [0;10])
-        ; (prod [0;10] (3--7))
-        ; (prod [1;9] [5])
-        ; (prod [5] [1;9])
+        [ prod (3--7) [0;10]
+        ; prod [0;10] (3--7)
+        ; prod [1;9] [5]
+        ; prod [5] [1;9]
         ]
 
       @
       List.map (List.map (fun c -> WPawn, c))
-        [ (prod (4--6) (4--6))
-        ; (prod [3;7] [5])
-        ; (prod [5] [3;7])
+        [ List.filter ((<>)(5,5)) (prod (4--6) (4--6))
+        ; prod [3;7] [5]
+        ; prod [5] [3;7]
         ]
 
       @
