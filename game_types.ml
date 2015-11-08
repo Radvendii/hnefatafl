@@ -26,6 +26,13 @@ let (--) i j =
 let prod l1 l2 =
   List.flatten @@ List.map (fun x -> List.map (fun y -> (x,y)) l2) l1
 
+let in_range (xd,yd) (x,y) =
+  0 <= x   &&
+  0 <= y   &&
+  x < xd &&
+  y < yd
+
+
 type action =
   | Quit
   | Move of (coord * coord)

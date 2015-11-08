@@ -94,12 +94,6 @@ module AsciiGUI : GUI = struct
       b.pieces ;
     present ()
 
-  let in_range (xd,yd) (x,y) =
-    0 < x   &&
-    0 < y   &&
-    x <= xd &&
-    y <= yd
-
   let user_input () =
     loop_while (fun s ->
         match guiaction_of_event (poll_event ()) s with
