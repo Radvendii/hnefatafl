@@ -59,6 +59,10 @@ let valid_moves c1 b =
     if in_range b.dims c2' && piece_at c2' b = None
     then c2'::helper c2' dir
     else [] in
+  (match piece_at c1 b with
+   | None -> (fun _ -> [])
+   | Some(WKing) -> List.filter (fun (x,y) -> (x - (fst c1) <= 3) && ((fst c1) - x <= 3) && (y - (snd c1) <= 3) && ((snd c1) - y <= 3))
+   | _ -> (fun x -> x)) @@
   List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
 
 let valid_move c1 c2 b =
