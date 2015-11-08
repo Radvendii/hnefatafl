@@ -32,6 +32,12 @@ let rec pop_find f = function
     else let (xs', x') = pop_find f xs in (x::xs', x')
 
 type direction = Up | Down | Left | Right
+let step_dir dir (x,y) =
+  match dir with
+  | Up -> (x,y+1)
+  | Down -> (x, y-1)
+  | Left -> (x-1, y)
+  | Right -> (x+1, y)
 
 let closest_pieces (a,b) bd =
   let contact_pieces_in_yPos = List.filter (fun (_,(x,y)) -> x=a && y>b) bd.pieces in
