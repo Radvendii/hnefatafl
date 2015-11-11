@@ -5,15 +5,9 @@ type board = { dims   : int * int
              ; pieces : (piece * coord) list
              }
 
+val piece_at : coord -> board -> piece option
+
 type action =
   | Quit
   | Move of (coord * coord)
   | Nop
-
-let rec piece_at c b =
-  match b.pieces with
-  | [] -> None
-  | (p,c')::ps ->
-    if c' = c
-    then Some(p)
-    else piece_at c {b with pieces = ps}

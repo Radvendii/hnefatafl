@@ -1,3 +1,4 @@
+open Helpers
 open Game_types
 open Ascii.AsciiGUI
 

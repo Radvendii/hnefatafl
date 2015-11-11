@@ -1,3 +1,4 @@
+open Helpers
 open Game_types
 open GUI
 
@@ -46,6 +47,11 @@ module AsciiGUI : GUI = struct
     | GUINop
 
   type guistate = {selected : coord option}
+
+  let char_of_piece = function
+    | BPawn -> 'X'
+    | WPawn -> 'O'
+    | WKing -> '@'
 
   let init () = let _ = init () in ()
   let deinit = shutdown
