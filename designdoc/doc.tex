@@ -1,8 +1,9 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
+\documentclass[11pt, oneside]{article}
+\usepackage{latexrc}
+\usepackage{hyperref}
 
 \title{CS3110 Hnefatafl Design Doc}
-\author{Elizabeth VanDenburgh (eav38), Joseph Dwyer (jmd456), Taeer Bar-Yam (tb442)}
+\author{Elizabeth VanDenburgh (eav38)\and Joseph Dwyer (jmd456)\and Taeer Bar-Yam (tb442)}
 \date{November, 12 2015}
 
 \begin{document}
@@ -14,11 +15,10 @@ The game is played on an $11\times 11$ checkered board with two uneven sides.
 $12$ white pieces are positioned around a white ``king'' at the center of the
 board, with $24$ black pieces arranged on the edges surrounding them.
 See~\ref{fig:initial_position}.
-\begin{figure}
-  \label{fig:initial_position}
+\begin{figure}\label{fig:initial_position}
   \centering
-    \scalebox{.5}{\includegraphics{hnefatafl}}
-    \caption{Hnefatafl starting board position. Source: \url{https://medium.com/war-is-boring/you-have-to-play-this-1-600-year-old-viking-war-game-cef088ae4e2d\#.10kof827g}}
+  \scalebox{.5}{\includegraphics{hnefatafl}}
+  \caption{Hnefatafl starting board position. Source: \url{https://medium.com/war-is-boring/you-have-to-play-this-1-600-year-old-viking-war-game-cef088ae4e2d\#.10kof827g}}
 \end{figure}
 There are three main mechanics involved in the game:
 \begin{enumerate}
@@ -45,6 +45,7 @@ interface that uses chess-like notation for movement and output a ASCII grid to
 show positions of pieces. This interface will likely remain available as an
 option\\
 This will be playable against another human player, or against an AI.
+
 \section{Stretch Goals:}
 \begin{itemize}
 \item Hnefatafl is an old game, and there are many versions of it that exist.
@@ -56,8 +57,19 @@ This will be playable against another human player, or against an AI.
 \section{Architecture}
 Thinking pipe and filter
 information goes from user - gui - backend - gui - user
+\begin{figure}\label{fig:CCD}
+  \centering
+  \scalebox{1.}{\includegraphics{CCD}}
+  \caption{Connector Component Diagram of the pipe and filter architecture for
+    our project.}
+\end{figure}
 
 \section{System Design}
+\begin{figure}\label{fig:MDD}
+  \centering
+  \scalebox{1.}{\includegraphics{MDD}}
+  \caption{Diagram of dependencies between modules in our project.}
+\end{figure}
 \subsection{GUI}
 \subsection{Backend}
 Depends on GUI.
