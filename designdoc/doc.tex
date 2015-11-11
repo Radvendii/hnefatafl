@@ -139,29 +139,40 @@ The alternative would be to load preferences out of a plain text file.\\\\
 \end{description}
 
 \section{Module Design}
+See attached .mli files.
 
 \section{Data}
-\begin{itemize}
-\item Player turn
-\item Piece locations to maintain the current board
-\item Game configurations
-\end{itemize}
 Structures include:
 \begin{itemize}
-\item Piece types
+\item Piece types (variant)
+\item Coordinates (type synonym for int * int)
+\item Action variant (what actions the user can perform)
 \item Game configurations
-\item Board with dimensions and piece locations
+\item Board with dimensions and list of piece locations
 \end{itemize}
+
+State data:
+\begin{itemize}
+\item Which player's turn it is
+\item Current board state
+\item Which game configuration was selected
+\end{itemize}
+The GUI also stores the current selected piece (the piece the user would like to
+move) until the user selects a location to move it to.
+
+Everything is passed through function calls. There is no imperative or global
+data.
 
 \section{External Libraries}
 \begin{itemize}
 \item Termbox for creating an ascii board
 \item OpenGL for creating a more graphical gui
+\item Potentially Dynlink for dynamically linking game modes
 \end{itemize}
 
 \section{Testing Plan}
 \begin{itemize}
-\item Write unit tests for sate of the board after certain moves
+\item Write unit tests for state of the board after certain moves
 \item Watch the AI play against itself
 \item Get play testers
 \end{itemize}
