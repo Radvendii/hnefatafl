@@ -1,0 +1,173 @@
+\ProvidesPackage{latexrc}
+\usepackage{amsfonts, amsmath, amsthm, amssymb, amstext}
+\usepackage{calc}
+% \usepackage{bbm}
+\usepackage{cancel}
+\usepackage{fullpage,tikz,soul,tikz-cd,graphicx}
+\usepackage{multicol,color,enumerate,bm}
+\usepackage[utf8]{inputenc}
+\usetikzlibrary{matrix, arrows}
+
+%%% STYLISTICS %%%
+
+\renewcommand\labelitemi{{\boldmath$\cdot$}} % shrinks bullet points
+% positions textcircled things correctly
+\newcommand{\textcirc}[1]{\raisebox{.5pt}{\textcircled{\raisebox{-.9pt} {#1}}}} 
+
+%%% THEOREMS %%%
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[subsection]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{truefact}[theorem]{Fact}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{example}{Example}
+\newtheorem*{examples}{Examples}
+
+%%% SHORTHANDS FOR THEOREMS %%%
+
+\newcommand{\poof}{\begin{proof}}
+\newcommand{\npoof}{\end{proof}}
+
+\newcommand{\pro}{\begin{proposition}}
+\newcommand{\npro}{\end{proposition}}
+
+\newcommand{\defn}{\begin{definition}}
+\newcommand{\ndefn}{\end{definition}}
+
+\renewcommand{\mark}{\begin{remark}}
+\newcommand{\nmark}{\end{remark}}
+
+\newcommand{\thm}{\begin{theorem}}
+\newcommand{\nthm}{\end{theorem}}
+
+\newcommand{\lemon}{\begin{lemma}}
+\newcommand{\nlemon}{\end{lemma}}
+
+\newcommand{\enum}{\begin{enumerate}}
+\newcommand{\nenum}{\end{enumerate}}
+
+\newcommand{\cor}{\begin{corollary}}
+\newcommand{\ncor}{\end{corollary}}
+
+\newcommand{\exam}{\begin{example}}
+\newcommand{\nexam}{\end{example}}
+
+%%% BLACKBOARD AND MATHCAL %%%
+
+%% Fixing lowercase letters in \mathbb
+% Doesn't work. Fonts missing bullshit
+\usepackage{bbm}
+\renewcommand{\mathbb}{\mathbbm}
+
+\newcommand{\bb}[1]{\expandafter\newcommand\expandafter{\csname #1\endcsname}{\mathbb {#1}}} % turns \foo into \mathbb{foo}
+
+\bb C
+\bb Q
+\bb N
+\bb Z
+\bb F
+\bb R
+
+\newcommand{\mc}[1]{\expandafter\newcommand\expandafter{\csname #1\endcsname}{\mathcal {#1}}} % turns \foo into \mathcal{foo}
+
+\mc U
+\renewcommand{\P}{\mathcal{P}}
+
+\newcommand{\mrm}[1]{\expandafter\newcommand\expandafter{\csname #1\endcsname}{\mathrm {#1}}}
+% turns \foo into \mathrm{foo}, in this section because that's what I'm using it for
+
+\mrm{Hom}
+\mrm{Aut}
+\mrm{PGL}
+\mrm{PSL}
+\mrm{GL}
+\mrm{SL}
+\mrm{PG}
+\mrm{PSO}
+\mrm{PS}
+\mrm{PSU}
+
+%%% LOGIC %%%
+\newcommand{\E}{\exists}
+\newcommand{\A}{\forall}
+\newcommand{\0}{\varnothing}
+
+%%% ARROW SHORTHANDS %%%
+
+\newcommand{\tooo}{\longrightarrow}
+\newcommand{\Thus}{\Longrightarrow}
+\newcommand{\thus}{\Rightarrow}
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\mto}{\mapsto}
+\newcommand{\onto}{\twoheadrightarrow}
+
+%%% VARIABLE SHORTHANDS, ESP. GREEK LETTERS %%%
+
+\renewcommand{\a}{\alpha}
+\renewcommand{\b}{\beta}
+\newcommand{\g}{\gamma}
+\renewcommand{\d}{\delta}
+\newcommand{\ep}{\varepsilon}
+\renewcommand{\k}{\kappa}
+\renewcommand{\l}{\lambda}
+\newcommand{\ph}{\varphi}
+\newcommand{\w}{\omega}
+
+%%% COMMUTATIVE DIAGRAMS %%%
+
+\newcommand{\SES}[5]{
+	\begin{tikzpicture}
+	\node (01) at (-3,0) {$0$};
+	\node (A) at (-2,0) {$#1$};
+	\node (B) at (0,0) {$#3$};
+	\node (C) at (2,0) {$#5$};
+	\node (02) at (3,0) {$0$};
+
+	\draw[->] (01) -- (A);
+	\draw[->] (A) to node [auto] {$#2$} (B);
+	\draw[->] (B) to node [auto] {$#4$} (C);
+	\draw[->] (C) -- (02);
+	\end{tikzpicture}
+	} %short exact sequence of \SES{A}{f}{B}{g}{C} with f:A to B and g: B to C
+
+%%% GROUP SHORTHANDS %%%
+
+\renewcommand{\ker}{\mathrm{ker \:}}
+\newcommand{\im}{\mathrm{im \:}}
+
+
+%%% DELIMITERS %%%
+\newcommand{\set}[1]{\left\{#1\right\}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\Abs}[1]{\left\lVert#1\right\rVert}
+\newcommand{\abs}[1]{\left\lvert#1\right\rvert}
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+
+%%% LIMITS %%%
+\renewcommand{\L}[2]{_{#1}^{#2}}
+\newcommand{\eval}{\bigg|}
+
+%%% OTHER %%%
+
+\newcommand{\ins}{\subseteq}
+\newcommand{\by}{\times}
+\newcommand{\oby}{\otimes}
+\newcommand{\what}{\widehat}
+\newcommand{\inv}{{-1}} % for use as $f^\inv$
+\newcommand{\sqrtfrac}[2]{\sqrt{\frac{#1}{#2}}}
+
+\newcommand{\dbyd}[2]{\frac{\partial #1}{\partial #2}}
+
+%\whyeq gives an '=' with the explanation above
+\newcommand*{\MyBl}[1]{\text{#1}}
+\newcommand*{\eqblU}[1]{\ensuremath{\mathop{\overset{\MyBl{#1}}{=}}}}% Unscaled version
+\newcommand*{\whyeq}[1]{\mathop{\overset{\MyBl{#1}}{\resizebox{\widthof{\eqblU{#1}}}{\heightof{=}}{=}}}}
