@@ -1,3 +1,5 @@
+open Game_types
+
 module type Game_mode = sig
   (* [init_board] is the initial board configuration for this game mode*)
   val init_board  : board
