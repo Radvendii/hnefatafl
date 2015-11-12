@@ -47,14 +47,6 @@ show positions of pieces. This interface will likely remain available as an
 option\\
 This will be playable against another human player, or against an AI.
 
-\section{Stretch Goals:}
-\begin{itemize}
-\item Hnefatafl is an old game, and there are many versions of it that exist.
-  Time permitting, we would like to implement many of these variants, working
-  off of a general game core.
-\item Detect if the game has become unwinnable.
-\end{itemize}
-
 \section{Architecture}
 \begin{figure}[H]\label{fig:CCD}
   \centering
@@ -113,7 +105,12 @@ If playing as one person, the AI module will be passed the current board state
 by the Backend. Using this, it will create a decision tree and decide on an
 ``intelligent'' move
 to execute.\\
-We can put AI in a separate thread to allow more computation for a smarter AI.
+We can put the AI calls in a separate thread to allow more computation for a
+smarter AI.\\\\
+Ideally we would like to create either a general AI for all game modes or a
+stronger AI for each individual game mode. Based on the amount of time that we
+have, and the complexity of building such AI, we will decide which AI
+implementation to use.
 
 \subsection{Helpers}
 Basic functions that either we feel should have been included in OCaml or most
@@ -173,8 +170,26 @@ data.
 \section{Testing Plan}
 \begin{itemize}
 \item Write unit tests for state of the board after certain moves
+  \begin{itemize}
+  \item Valid moves
+  \item Invalid moves
+  \item Win conditions
+  \item Piece removal conditions
+  \item All of these, in various game modes
+  \end{itemize}
 \item Watch the AI play against itself
 \item Get play testers
+\end{itemize}
+
+\section{Stretch Goals:}
+\begin{itemize}
+\item Hnefatafl is an old game, and there are many versions of it that exist.
+  Time permitting, we would like to implement many of these variants, working
+  off of a general game core.
+\item Detect if the game has become unwinnable.
+\item Collecting statistics on the game (who won, how many turns it took, etc)
+\item Storing the state of the game at every turn, and enabling turn by turn
+  playback
 \end{itemize}
 
 \end{document}
