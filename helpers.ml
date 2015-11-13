@@ -17,3 +17,19 @@ let rec loop_while f s =
   match f s with
   | `Cont(s') -> loop_while f s'
   | `Break(v) -> v
+
+
+(*split input string into a char list
+ * inverse of join
+ *)
+let rec char_list_of_string str =
+    if str = ""
+    then []
+    else let open String in
+        (get str 0) :: (char_list_of_string (sub str 1 ((length str) - 1)))
+
+(*join input char list into a string
+ * inverse of explode
+ *)
+let rec string_of_char_list xs =
+  List.fold_left (^) "" (List.map Char.escaped xs)
