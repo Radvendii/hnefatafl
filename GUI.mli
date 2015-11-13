@@ -15,8 +15,9 @@ module type GUI = sig
    * appropriate for this GUI) and returns an action to perform. *)
   val user_input : unit -> action
 
-  (* [menu ms] presents the string part of ms as menu options and
-   * prompts the user to select an option. It then returns the 'a
-   * part of the menu option that is selected. *)
-  val menu       : (string * 'a) list -> 'a
+  (* [menu title ms] presents the string part of ms as menu options
+   * to a menu named [title] and prompts the user to select an option.
+   * It then returns the 'a part of the menu option that is selected,
+   * or None if the user exits the menu *)
+  val menu       : string -> (string * 'a) list -> 'a option
 end

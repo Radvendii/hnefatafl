@@ -100,6 +100,61 @@ module AsciiGUI : GUI = struct
       b.pieces ;
     present ()
 
+  let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
+    let rec char_list_helper x' y' cs =
+    match cs with
+    | [] -> ()
+    | c::cs' ->
+      match c with
+      | '\n' -> char_list_helper x (y'+1) cs'
+      | c    ->
+        set_cell_char ~fg:fg ~bg:bg x' y' c ;
+        char_list_helper (x'+1) y' cs' in
+    char_list_helper x y (char_list_of_string s)
+
+
+  let draw_menu title strs (sel : int) =
+    clear ();
+    set_cell_str ~fg:Green 0 0 title ;
+    List.iteri (fun i ->
+        let fg = if i = sel then Red else Default in
+        set_cell_str ~fg:fg 2 ((i+1)*2)) strs;
+    present ()
+
+  let menuaction_of_event e =
+    match e with
+    | Utf8 _ | Resize _ -> `MenuNop
+    | Key k ->
+      (match k with
+       | Arrow_down  -> `MenuDown
+       | Arrow_up    -> `MenuUp
+       | _ -> `MenuNop)
+    | Ascii c ->
+      (match c with
+       | 'j' -> `MenuDown
+       | 'k' -> `MenuUp
+       | 'q' | '\x1B' -> `MenuQuit
+       | '\x0D' -> `MenuSelect
+       | ' ' -> `MenuSelect
+       | _   -> `MenuNop)
+
+  let bound_below n b =
+    if n < b then b else n
+  let bound_above n b =
+    if n > b then b else n
+
+  let menu title options =
+    let len = (List.length options)-1 in
+    loop_while (fun s ->
+        draw_menu title (List.map fst options) s ;
+        match menuaction_of_event (poll_event ()) with
+        | `MenuNop -> `Cont(s)
+        | `MenuDown -> `Cont(bound_above (s+1) len)
+        | `MenuUp -> `Cont(bound_below (s-1) 0)
+        | `MenuSelect -> `Break(Some(snd (List.nth options s)))
+        | `MenuQuit -> `Break(None)) 0
+
+
   let user_input () =
     loop_while (fun s ->
         match guiaction_of_event (poll_event ()) s with

@@ -85,6 +85,10 @@ let valid_move c1 c2 b =
 
 let () =
   init () ;
+  let _ = menu "Test"
+      [ "yes", ()
+      ; "no",  ()
+      ] in
   loop_while (fun b ->
       draw_board b ;
       match user_input () with
