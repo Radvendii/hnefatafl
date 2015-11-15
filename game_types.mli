@@ -18,7 +18,7 @@ type board  = { dims   : int * int
  * or None if there is no piece there. *)
 val piece_at : coord -> board -> piece option
 
-val next_turn : board -> player
+val next_turn : player -> player
 
 (* the actions that a user can perform when interacting with the game. *)
 type action =

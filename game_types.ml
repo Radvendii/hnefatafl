@@ -23,7 +23,6 @@ let rec piece_at c b =
     then Some(p)
     else piece_at c {b with pieces = ps}
 
-let next_turn b =
-  match b.turn with
-  |White -> Black
-  |Black -> White
+let next_turn = function
+  | White -> Black
+  | Black -> White

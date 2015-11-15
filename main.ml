@@ -154,21 +154,20 @@ let () =
       draw_board b ;
       match user_input () with
       | Move(c1, c2) ->
-        (Cont { b with
-                 pieces =
-                   let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-                   let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-                   match p1 with
-                   | None -> ps (* if someone tries to move nothing, nothing happens*)
-                   | Some(p1') ->
-                     if valid_move c1 c2 b (* if it's a valid move*)
-                     then
-                       let nps = (fst p1', c2)::ps' in (* move the piece!*)
-                       let rps = piece_taken c2 {b with pieces = nps} in
-                       List.filter (fun x -> not @@ List.mem (snd x) rps) nps
-                     else b.pieces (* otherwise do nothing *)
-                ; turn = next_turn b
-              })
+           if not @@ valid_move c1 c2 b then Cont(b)
+           else Cont
+             { b with
+                turn = next_turn b.turn ;
+                pieces =
+                  let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+                  let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+                  match p1 with
+                  | None -> failwith "checked for in valid_move"
+                  | Some(p1') ->
+                      let nps = (fst p1', c2)::ps' in (* move the piece!*)
+                      let rps = piece_taken c2 {b with pieces = nps} in
+                      List.filter (fun x -> not @@ List.mem (snd x) rps) nps
+              }
       | Quit -> Break(())
       | Nop -> Cont(b)
     ) init_board ;
