@@ -3,6 +3,8 @@ type coord  = int * int
 
 type player = | White | Black
 
+val string_of_player : player -> string
+
 (* these are the only pieces found in hnefatafl *)
 type piece  = | BPawn | WPawn | WKing
 

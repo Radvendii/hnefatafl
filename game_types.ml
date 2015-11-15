@@ -1,5 +1,8 @@
 type coord  = int * int
 type player = | White | Black
+let string_of_player = function
+  | White -> "white"
+  | Black -> "black"
 type piece  = | BPawn | WPawn | WKing
 
 type board  = { dims   : int * int
