@@ -143,16 +143,16 @@ module AsciiGUI : GUI = struct
   let bound_above n b =
     if n > b then b else n
 
-  let menu title options =
+  let menu title options default =
     let len = (List.length options)-1 in
     loop_while (fun s ->
         draw_menu title (List.map fst options) s ;
         match menuaction_of_event (poll_event ()) with
-        | `MenuNop -> `Cont(s)
-        | `MenuDown -> `Cont(bound_above (s+1) len)
-        | `MenuUp -> `Cont(bound_below (s-1) 0)
-        | `MenuSelect -> `Break(Some(snd (List.nth options s)))
-        | `MenuQuit -> `Break(None)) 0
+        | `MenuNop -> Cont(s)
+        | `MenuDown -> Cont(bound_above (s+1) len)
+        | `MenuUp -> Cont(bound_below (s-1) 0)
+        | `MenuSelect -> Break(snd @@ List.nth options s)
+        | `MenuQuit -> Break(default)) 0
 
 
   let user_input () =
@@ -162,22 +162,22 @@ module AsciiGUI : GUI = struct
           if not @@ List.mem (get_cell_char x y) [Some('|'); Some('-')] (* don't allow movement onto the border *)
           then (set_cursor x y
                ; present ()
-               ; `Cont(s))
-          else `Cont(s)
+               ; Cont(s))
+          else Cont(s)
         | GUISelect(x, y) ->
           set_cell_char ~bg:Blue x y
             (match get_cell_char x y with
              | None -> ' '
              | Some c -> c)
-        ; `Cont({selected = Some (x,y)})
+        ; Cont({selected = Some (x,y)})
         | GUIMove((x1,y1),(x2,y2)) ->
           set_cell_char x1 y1
             (match get_cell_char x1 y1 with
              | None -> ' '
              | Some c -> c) (* reset the color *)
-        ; `Break(Move((x1-1,y1-1),(x2-1,y2-1)))
-        | GUINop -> `Cont(s)
-        | GUIQuit -> `Break(Quit))
+        ; Break(Move((x1-1,y1-1),(x2-1,y2-1)))
+        | GUINop -> Cont(s)
+        | GUIQuit -> Break(Quit))
       {selected = None}
 
 end
