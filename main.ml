@@ -153,7 +153,7 @@ let () =
       draw_board b ;
       match user_input () with
       | Move(c1, c2) ->
-        (`Cont { b with
+        (Cont { b with
                  pieces =
                    let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
                    let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
@@ -167,7 +167,7 @@ let () =
                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
                      else b.pieces (* otherwise do nothing *)
                })
-      | Quit -> `Break(())
-      | Nop -> `Cont(b)
+      | Quit -> Break(())
+      | Nop -> Cont(b)
     ) init_board ;
   deinit ()

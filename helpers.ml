@@ -13,11 +13,14 @@ let in_range (xd,yd) (x,y) =
   x < xd &&
   y < yd
 
+type ('a, 'b) looptype =
+  | Cont of 'a
+  | Break of 'b
+
 let rec loop_while f s =
   match f s with
-  | `Cont(s') -> loop_while f s'
-  | `Break(v) -> v
-
+  | Cont(s') -> loop_while f s'
+  | Break(v) -> v
 
 (*split input string into a char list
  * inverse of join
