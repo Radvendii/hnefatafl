@@ -24,7 +24,7 @@ let init_board =
 
       @
       [[WKing, (5,5)]]
-  }
+  ; turn = Black}
 
 let rec pop_find f = function
   | [] -> [], None
@@ -128,7 +128,10 @@ let valid_moves c1 b =
   List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
 
 let valid_move c1 c2 b =
-  List.mem c2 (valid_moves c1 b)
+  match piece_at c1 b with
+  |None -> false
+  |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
+  |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
 
 (*let valid_move_space (p:piece) ((a,b):coord) (bd:board) : coord list =
   let contact_pieces = closest_pieces (a,b) bd in
@@ -164,7 +167,8 @@ let () =
                        let rps = piece_taken c2 {b with pieces = nps} in
                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
                      else b.pieces (* otherwise do nothing *)
-               })
+                ; turn = next_turn b
+              })
       | Quit -> Break(())
       | Nop -> Cont(b)
     ) init_board ;

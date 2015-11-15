@@ -7,6 +7,7 @@ type piece  = | BPawn | WPawn | WKing
 
 type board  = { dims   : int * int
               ; pieces : (piece * coord) list
+              ; turn   : player
               }
 
 type action =
@@ -21,3 +22,8 @@ let rec piece_at c b =
     if c' = c
     then Some(p)
     else piece_at c {b with pieces = ps}
+
+let next_turn b =
+  match b.turn with
+  |White -> Black
+  |Black -> White
