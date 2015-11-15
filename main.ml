@@ -40,6 +40,66 @@ let step_dir dir (x,y) =
   | Left -> (x-1, y)
   | Right -> (x+1, y)
 
+let step_two_dir dir (x,y) =
+  match dir with
+  | Up -> (x,y+2)
+  | Down -> (x, y-2)
+  | Left -> (x-2, y)
+  | Right -> (x+2, y)
+
+let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
+  match piece_at (step_dir dir c) b with
+  |None -> []
+  |Some WPawn -> []
+  |Some WKing -> []
+  |Some BPawn -> begin
+    match piece_at (step_two_dir dir c) b with
+    |None -> []
+    |Some WPawn -> [step_dir dir c]
+    |Some BPawn -> []
+    |Some WKing -> []
+  end
+
+let make_cross dir (x,y) b =
+  match dir with
+  |Up -> (piece_at (x,y+2) b, piece_at (x-1,y+1) b, piece_at (x+1,y+1) b)
+  |Down -> (piece_at (x,y-2) b, piece_at (x-1,y-1) b, piece_at (x+1,y-1) b)
+  |Left -> (piece_at (x-2,y) b, piece_at (x-1,y+1) b, piece_at (x-1,y-1) b)
+  |Right -> (piece_at (x+2,y) b, piece_at (x+1,y+1) b, piece_at (x+1,y-1) b)
+
+let check_capture_bpawn (dir:direction) (c:coord) (b:board) : coord list =
+  match piece_at (step_dir dir c) b with
+  |None -> []
+  |Some BPawn -> []
+  |Some WPawn -> begin
+    match piece_at (step_two_dir dir c) b with
+    |None -> []
+    |Some BPawn -> [step_dir dir c]
+    |Some WPawn -> []
+    |Some WKing -> []
+    end
+  |Some WKing -> begin
+    match make_cross dir c b with
+    |(Some BPawn, Some BPawn, Some BPawn) -> [step_dir dir c]
+    |_ -> []
+    end
+
+
+(*Capturing of pieces,
+ *the white king cannot participate in a capture both actively and passively
+ *)
+let piece_taken ((x,y):coord) (b:board) : coord list =
+  match piece_at (x,y) b with
+  |None -> failwith "No piece here"
+  |Some WKing -> []
+  |Some BPawn ->
+    List.flatten @@ List.map (fun d -> check_capture_bpawn d (x,y) b)
+      [Up; Down; Left; Right]
+  |Some WPawn ->
+    List.flatten @@ List.map (fun d -> check_capture_wpawn d (x,y) b)
+      [Up; Down; Left; Right]
+
+
 (* let closest_pieces (a,b) bd = *)
 (*   let contact_pieces_in_yPos = List.filter (fun (_,(x,y)) -> x=a && y>b) bd.pieces in *)
 (*   let contact_pieces_in_xPos = List.filter (fun (_,(x,y)) -> y=b && x>a) bd.pieces in *)
@@ -101,7 +161,10 @@ let () =
                    | None -> ps (* if someone tries to move nothing, nothing happens*)
                    | Some(p1') ->
                      if valid_move c1 c2 b (* if it's a valid move*)
-                     then (fst p1', c2)::ps' (* move the piece!*)
+                     then
+                       let nps = (fst p1', c2)::ps' in (* move the piece!*)
+                       let rps = piece_taken c2 {b with pieces = nps} in
+                       List.filter (fun x -> not @@ List.mem (snd x) rps) nps
                      else b.pieces (* otherwise do nothing *)
                })
       | Quit -> `Break(())
