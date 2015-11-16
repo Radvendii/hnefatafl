@@ -36,3 +36,14 @@ let rec char_list_of_string str =
  *)
 let rec string_of_char_list xs =
   List.fold_left (^) "" (List.map Char.escaped xs)
+
+
+type direction = Up | Down | Left | Right
+let step_dir dir (x,y) =
+  match dir with
+  | Up -> (x,y+1)
+  | Down -> (x, y-1)
+  | Left -> (x-1, y)
+  | Right -> (x+1, y)
+
+let step_two_dir dir c = step_dir dir (step_dir dir c)

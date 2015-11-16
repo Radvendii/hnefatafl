@@ -33,21 +33,6 @@ let rec pop_find f = function
     then (xs, Some x)
     else let (xs', x') = pop_find f xs in (x::xs', x')
 
-type direction = Up | Down | Left | Right
-let step_dir dir (x,y) =
-  match dir with
-  | Up -> (x,y+1)
-  | Down -> (x, y-1)
-  | Left -> (x-1, y)
-  | Right -> (x+1, y)
-
-let step_two_dir dir (x,y) =
-  match dir with
-  | Up -> (x,y+2)
-  | Down -> (x, y-2)
-  | Left -> (x-2, y)
-  | Right -> (x+2, y)
-
 let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
   match piece_at (step_dir dir c) b with
   |None -> []
