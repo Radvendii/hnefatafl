@@ -1,6 +1,7 @@
 open Helpers
 open Game_types
-open Ascii.AsciiGUI
+open Graphical.GraphicsGUI
+(* open Ascii.AsciiGUI *)
 open Menu
 
 (* TODO? read in inital positions and rules from textfile *)
@@ -134,7 +135,7 @@ let valid_move c1 c2 b =
 
 let () =
   init () ;
-  let _ = initmenu () in
+  (* let _ = initmenu () in *)
   loop_while (fun b ->
       draw_board b ;
       match user_input () with
