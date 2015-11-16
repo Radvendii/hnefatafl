@@ -26,10 +26,10 @@ module GraphicsGUI : GUI = struct
     ]
 
   let shift_points cs x' y' w h =
+    let (x',y',w,h) = (float_of_int x', float_of_int y', float_of_int w, float_of_int h) in
     List.map (fun (x,y) -> (int_of_float(x'+.w*.x), int_of_float(y'+.h*.y))) cs
 
   let draw_piece p x y w h =
-    let (x,y,w,h) = (float_of_int x, float_of_int y, float_of_int w, float_of_int h) in
     let pawn_points' = Array.of_list @@ shift_points pawn_points x y w h in
     let king_points' = Array.of_list @@ shift_points king_points x y w h in
     match p with
