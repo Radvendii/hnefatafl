@@ -1,7 +1,7 @@
 open Helpers
 open Game_types
-open Graphical.GraphicsGUI
-(* open Ascii.AsciiGUI *)
+(* open Graphical.GraphicsGUI *)
+open Ascii.AsciiGUI
 open Menu
 
 (* TODO? read in inital positions and rules from textfile *)

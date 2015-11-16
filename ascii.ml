@@ -80,6 +80,18 @@ module AsciiGUI : GUI = struct
           | Some(sx, sy) -> GUIMove((sx,sy),(cx,cy)))
        | _   -> GUINop)
 
+  let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
+    let rec char_list_helper x' y' cs =
+    match cs with
+    | [] -> ()
+    | c::cs' ->
+      match c with
+      | '\n' -> char_list_helper x (y'+1) cs'
+      | c    ->
+        set_cell_char ~fg:fg ~bg:bg x' y' c ;
+        char_list_helper (x'+1) y' cs' in
+    char_list_helper x y (char_list_of_string s)
+
   let draw_board b =
     (* draw the border *)
     clear () ;
@@ -98,19 +110,9 @@ module AsciiGUI : GUI = struct
       (fun (p,c) ->
          set_cell_char (fst c + 1) (snd c + 1) (char_of_piece p)) (* shift by one to avoid border *)
       b.pieces ;
+    (* print who's turn it is *)
+    set_cell_str 0 (snd b.dims + 3) ("It is " ^ string_of_player b.turn ^ "'s turn");
     present ()
-
-  let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
-    let rec char_list_helper x' y' cs =
-    match cs with
-    | [] -> ()
-    | c::cs' ->
-      match c with
-      | '\n' -> char_list_helper x (y'+1) cs'
-      | c    ->
-        set_cell_char ~fg:fg ~bg:bg x' y' c ;
-        char_list_helper (x'+1) y' cs' in
-    char_list_helper x y (char_list_of_string s)
 
 
   let draw_menu title strs (sel : int) =
