@@ -1,1 +1,1 @@
-compile.opam_packages=termbox
+compile.opam_packages=termbox,graphics
