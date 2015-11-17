@@ -92,7 +92,7 @@ let piece_taken ((x,y):coord) (b:board) : coord list =
 let rec find_wking (b:board) : coord option =
   match b.pieces with
   |[] -> None
-  |(WKing, (x,y)) -> Some (x,y)
+  |(WKing, (x,y))::ps -> Some (x,y)
   |p::ps -> find_wking {b with pieces = ps}
 
 (*Naive implementation of winning.
