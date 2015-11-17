@@ -102,7 +102,7 @@ let rec find_wking (b:board) : coord option =
 let player_won (b:board) : player option =
   match find_wking b with
   |None -> Some Black
-  |Some (x,y) -> if x = 0 || y = 0 || x = fst b.dims || y = fst b.dims
+  |Some (x,y) -> if x = 0 || y = 0 || x = ((fst b.dims)-1) || y = ((fst b.dims)-1)
                 then Some White
                 else None
 
