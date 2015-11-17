@@ -171,15 +171,26 @@ module AsciiGUI : GUI = struct
             (match get_cell_char x y with
              | None -> ' '
              | Some c -> c)
+        ; present ()
         ; Cont({selected = Some (x,y)})
         | GUIMove((x1,y1),(x2,y2)) ->
-          set_cell_char x1 y1
+          set_cell_char ~bg:Default x1 y1
             (match get_cell_char x1 y1 with
              | None -> ' '
              | Some c -> c) (* reset the color *)
         ; Break(Move((x1-1,y1-1),(x2-1,y2-1)))
         | GUINop -> Cont(s)
-        | GUIQuit -> Break(Quit))
+        | GUIQuit ->
+          match s.selected with
+          | None -> Break(Quit)
+          | Some(x,y) ->
+            (set_cell_char ~bg:Default x y
+                (match get_cell_char x y with
+                 | None -> ' '
+                 | Some c -> c) (* reset the color *)
+            ; present ()
+            ; Cont({selected = None}))
+      )
       {selected = None}
 
 end
