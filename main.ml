@@ -86,6 +86,25 @@ let piece_taken ((x,y):coord) (b:board) : coord list =
     List.flatten @@ List.map (fun d -> check_capture_wpawn d (x,y) b)
       [Up; Down; Left; Right]
 
+(*return the coordinates of the WKing on the board
+ *Returns None if the king is no longer in play
+ *)
+let rec find_wking (b:board) : coord option =
+  match b.pieces with
+  |[] -> None
+  |(WKing, (x,y)) -> Some (x,y)
+  |p::ps -> find_wking {b with pieces = ps}
+
+(*Naive implementation of winning.
+ *Black wins if the White King was captured
+ *White wins if the White King gets to any edge square of the board
+ *)
+let player_won (b:board) : player option =
+  match find_wking b with
+  |None -> Some Black
+  |Some (x,y) -> if x = 0 || y = 0 || x = fst b.dims || y = fst b.dims
+                then Some White
+                else None
 
 (* let closest_pieces (a,b) bd = *)
 (*   let contact_pieces_in_yPos = List.filter (fun (_,(x,y)) -> x=a && y>b) bd.pieces in *)
