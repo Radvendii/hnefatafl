@@ -74,7 +74,13 @@ module GraphicsGUI : GUI = struct
         match s.selected with
         | None ->
           synchronize ();
-          (let stat = wait_next_event [Button_down] in
+          (let stat = wait_next_event [Button_down; Key_pressed] in
+           if stat.keypressed
+           then
+             match stat.key with
+             | 'q' | '\x1B' -> Break(Quit)
+             | _ -> Cont(s)
+           else
            match pop_find (fun (_,c) -> c = (calc_inv_x stat.mouse_x, calc_inv_y stat.mouse_y) ) b.pieces with
            | (_, None)      -> Cont(s)
            | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
