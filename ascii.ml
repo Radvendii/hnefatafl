@@ -167,12 +167,12 @@ module AsciiGUI : GUI = struct
                ; Cont(s))
           else Cont(s)
         | GUISelect(x, y) ->
-          set_cell_char ~bg:Blue x y
-            (match get_cell_char x y with
-             | None -> ' '
-             | Some c -> c)
-        ; present ()
-        ; Cont({selected = Some (x,y)})
+          (match get_cell_char x y with
+           | None -> Cont(s)
+           | Some c ->
+             set_cell_char ~bg:Blue x y c
+           ; present ()
+           ; Cont({selected = Some (x,y)}))
         | GUIMove((x1,y1),(x2,y2)) ->
           set_cell_char ~bg:Default x1 y1
             (match get_cell_char x1 y1 with
@@ -185,9 +185,9 @@ module AsciiGUI : GUI = struct
           | None -> Break(Quit)
           | Some(x,y) ->
             (set_cell_char ~bg:Default x y
-                (match get_cell_char x y with
-                 | None -> ' '
-                 | Some c -> c) (* reset the color *)
+               (match get_cell_char x y with
+                | None -> ' '
+                | Some c -> c) (* reset the color *)
             ; present ()
             ; Cont({selected = None}))
       )
