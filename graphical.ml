@@ -4,9 +4,6 @@ open GUI
 open Graphics
 
 module GraphicsGUI : GUI = struct
-  let squares : (int*int*int*int) list ref = ref []
-  let redraw_screen : (unit -> unit) ref =
-    ref (fun () -> ())
   let init () =
     open_graph "";
     auto_synchronize false;
@@ -62,7 +59,6 @@ module GraphicsGUI : GUI = struct
     let draw_board b' =
       (* draw grid *)
       List.iter (fun (i,j) ->
-          squares := (calc_x i, calc_y j, side_len (), side_len ())::!squares;
           draw_rect
             (calc_x i)
             (calc_y j)
