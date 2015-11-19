@@ -57,6 +57,8 @@ module GraphicsGUI : GUI = struct
     let side_len () = draw_len () / size in
     let calc_x x = (size_x () - draw_len ())/2 + side_len () * x in
     let calc_y x = (size_y () - draw_len ())/2 + side_len () * x in
+    let calc_inv_x x = (x - (size_x () - draw_len ())/2) / side_len () in
+    let calc_inv_y y = (y - (size_y () - draw_len ())/2) / side_len () in
     let draw_board b' =
       (* draw grid *)
       List.iter (fun (i,j) ->
@@ -77,21 +79,19 @@ module GraphicsGUI : GUI = struct
         | None ->
           synchronize ();
           (let stat = wait_next_event [Button_down] in
-           let x = (stat.mouse_x - (size_x () - draw_len ())/2) / side_len () in
-           let y = (stat.mouse_y - (size_y () - draw_len ())/2) / side_len () in
-           match pop_find (fun (_,c) -> c = (x,y) ) b.pieces with
+           match pop_find (fun (_,c) -> c = (calc_inv_x stat.mouse_x, calc_inv_y stat.mouse_y) ) b.pieces with
            | (_, None)      -> Cont(s)
            | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
                                     ; board = {b with pieces = ps}}))
-        | Some (p,_) ->
+        | Some (p,c) ->
+          let (x,y) = mouse_pos () in
           (if button_down ()
            then
-             let (x,y) = mouse_pos () in
-             (draw_piece p x y (side_len ()) (side_len ()));
-             synchronize ();
-             Cont(s)
+             ((draw_piece p x y (side_len ()) (side_len ()));
+              synchronize ();
+              Cont(s))
            else
-             Cont({selected = None; board=b}))
+             Break(Move(c, (calc_inv_x x, calc_inv_y y))))
       ) {selected = None; board=b}
 
   let menu t os d =
