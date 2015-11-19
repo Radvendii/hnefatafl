@@ -158,8 +158,7 @@ let () =
   loop_while (fun b ->
       draw_board b ;
       match player_won b with
-      | Some(White) -> Break(())
-      | Some(Black) -> Break(())
+      | Some(p) -> display_win p; Break(())
       | None ->
         match user_input () with
         | Move(c1, c2) ->

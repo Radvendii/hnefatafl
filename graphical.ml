@@ -97,4 +97,6 @@ module GraphicsGUI : GUI = struct
     match os with
     | [] -> d
     | o::_ -> snd o
+
+  let display_win p = ()
 end

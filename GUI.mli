@@ -20,4 +20,6 @@ module type GUI = sig
    * It then returns the 'a part of the menu option that is selected,
    * or def if the user exits the menu *)
   val menu       : string -> (string * 'a) list -> 'a -> 'a
+
+  val display_win : player -> unit
 end

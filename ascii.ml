@@ -193,4 +193,7 @@ module AsciiGUI : GUI = struct
       )
       {selected = None}
 
+  let display_win p =
+    menu (string_of_player p ^ " won!") ["back", ()] ()
+
 end
