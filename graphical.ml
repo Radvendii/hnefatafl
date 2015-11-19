@@ -48,54 +48,51 @@ module GraphicsGUI : GUI = struct
       set_color black;
       draw_poly king_points'
 
-  let draw_board b =
-    redraw_screen := (fun () ->
-        (* draw grid *)
-        let (w,h) = b.dims in
-        let draw_len = min (size_x () * 19 / 20) (size_y () * 19 / 20) in
-        let size = max w h in
-        let side_len = draw_len / size in
-        let calc_x x = (size_x () - draw_len)/2 + side_len * x in
-        let calc_y x = (size_y () - draw_len)/2 + side_len * x in
-        List.iter (fun (i,j) ->
-            squares := (calc_x i, calc_y j, side_len, side_len)::!squares;
-            draw_rect
-              (calc_x i)
-              (calc_y j)
-              side_len
-              side_len
-          ) (prod (0 -- (w-1)) (0 -- (h-1)));
-        (* draw pieces *)
-        List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) side_len side_len) b.pieces);
-    clear_graph ();
-    !redraw_screen ();
-    synchronize ()
-
-  let user_input () =
-    loop_while (fun s ->
-        let stat = wait_next_event [Button_down; Button_up] in
-        clear_graph();
-        (match List.filter (fun (x,y,w,h) ->
-            x < stat.mouse_x
-            && y < stat.mouse_y
-            && x + w > stat.mouse_x
-            && y + h > stat.mouse_y) !squares
-        with
-        | [] ->
-          !redraw_screen ();
-          synchronize ()
-        | (x,y,w,h)::_ ->
-          set_color blue;
-          fill_rect x y w h;
-          set_color black;
-          !redraw_screen ();
-          synchronize ());
-          Cont(())
-      ) ()
+  type guistate = {selected : (piece * coord) option; board : board}
 
   let board b =
-    draw_board b;
-    user_input ()
+    let (w,h) = b.dims in
+    let draw_len () = min (size_x () * 19 / 20) (size_y () * 19 / 20) in
+    let size = max w h in
+    let side_len () = draw_len () / size in
+    let calc_x x = (size_x () - draw_len ())/2 + side_len () * x in
+    let calc_y x = (size_y () - draw_len ())/2 + side_len () * x in
+    let draw_board b' =
+      (* draw grid *)
+      List.iter (fun (i,j) ->
+          squares := (calc_x i, calc_y j, side_len (), side_len ())::!squares;
+          draw_rect
+            (calc_x i)
+            (calc_y j)
+            (side_len ())
+            (side_len ())
+        ) (prod (0 -- (w-1)) (0 -- (h-1)));
+      (* draw pieces *)
+      List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) (side_len ()) (side_len ())) b'.pieces in
+
+    loop_while (fun s ->
+        clear_graph ();
+        draw_board s.board;
+        synchronize ();
+        match s.selected with
+        | None ->
+          (let stat = wait_next_event [Button_down] in
+           let x = (stat.mouse_x - (size_x () - draw_len ())/2) / side_len () in
+           let y = (stat.mouse_y - (size_y () - draw_len ())/2) / side_len () in
+           match pop_find (fun (_,c) -> c = (x,y) ) b.pieces with
+           | (_, None)      -> Cont(s)
+           | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
+                                    ; board = {b with pieces = ps}}))
+        | Some (p,_) ->
+          (if button_down ()
+           then
+             let (x,y) = mouse_pos () in
+             (draw_piece p x y (side_len ()) (side_len ()));
+             synchronize ();
+             Cont(s)
+           else
+             Cont({selected = None; board=b}))
+      ) {selected = None; board=b}
 
   let menu t os d =
     match os with
