@@ -156,11 +156,10 @@ let () =
   init () ;
   let _ = initmenu () in
   loop_while (fun b ->
-      draw_board b ;
       match player_won b with
       | Some(p) -> display_win p; Break(())
       | None ->
-        match user_input () with
+        match board b with
         | Move(c1, c2) ->
           if not @@ valid_move c1 c2 b then Cont(b)
           else Cont

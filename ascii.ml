@@ -193,6 +193,10 @@ module AsciiGUI : GUI = struct
       )
       {selected = None}
 
+  let board b =
+    draw_board b;
+    user_input ()
+
   let display_win p =
     menu (string_of_player p ^ " won!") ["back", ()] ()
 

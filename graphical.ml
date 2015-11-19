@@ -73,7 +73,7 @@ module GraphicsGUI : GUI = struct
 
   let user_input () =
     loop_while (fun s ->
-        let stat = wait_next_event [Mouse_motion] in
+        let stat = wait_next_event [Button_down; Button_up] in
         clear_graph();
         (match List.filter (fun (x,y,w,h) ->
             x < stat.mouse_x
@@ -92,6 +92,10 @@ module GraphicsGUI : GUI = struct
           synchronize ());
           Cont(())
       ) ()
+
+  let board b =
+    draw_board b;
+    user_input ()
 
   let menu t os d =
     match os with

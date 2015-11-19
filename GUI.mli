@@ -7,13 +7,10 @@ module type GUI = sig
   (* deinitializes the GUI library for this GUI. *)
   val deinit     : unit -> unit
 
-  (* [draw_board b] clears what is currently on
-   * the screen and draws the given board. *)
-  val draw_board : board -> unit
-
-  (* [user_input ()] prompts the user for input (in whatever way is
-   * appropriate for this GUI) and returns an action to perform. *)
-  val user_input : unit -> action
+  (* [board b] presents the board to the user, and prompts the user
+   * for input. It then returns an action to perform based on that
+   * input *)
+  val board : board -> action
 
   (* [menu title ms def] presents the string part of ms as menu options
    * to a menu named [title] and prompts the user to select an option.
