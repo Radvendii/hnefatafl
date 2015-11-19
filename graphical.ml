@@ -73,9 +73,9 @@ module GraphicsGUI : GUI = struct
     loop_while (fun s ->
         clear_graph ();
         draw_board s.board;
-        synchronize ();
         match s.selected with
         | None ->
+          synchronize ();
           (let stat = wait_next_event [Button_down] in
            let x = (stat.mouse_x - (size_x () - draw_len ())/2) / side_len () in
            let y = (stat.mouse_y - (size_y () - draw_len ())/2) / side_len () in
