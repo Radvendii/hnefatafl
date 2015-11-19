@@ -47,3 +47,11 @@ let step_dir dir (x,y) =
   | Right -> (x+1, y)
 
 let step_two_dir dir c = step_dir dir (step_dir dir c)
+
+let rec pop_find f = function
+  | [] -> [], None
+  | x::xs ->
+    if f x
+    then (xs, Some x)
+    else let (xs', x') = pop_find f xs in (x::xs', x')
+

@@ -27,13 +27,6 @@ let init_board =
       [[WKing, (5,5)]]
   ; turn = Black}
 
-let rec pop_find f = function
-  | [] -> [], None
-  | x::xs ->
-    if f x
-    then (xs, Some x)
-    else let (xs', x') = pop_find f xs in (x::xs', x')
-
 let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
   match piece_at (step_dir dir c) b with
   |None -> []
