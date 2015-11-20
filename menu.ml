@@ -1,6 +1,7 @@
 open Helpers
 open Game_types
-open Ascii.AsciiGUI
+(* open Ascii.AsciiGUI *)
+open Graphical.GraphicsGUI
 
 type real_ai = | Real | AI
 let string_of_real_ai = function
@@ -25,24 +26,24 @@ let initmenu () : config option =
       | `Start ->
           menu "Hnefatafl"
           [ "Start Game",    Break(Some(c))
-          ; "Configuration", Cont((`Config, c))
+          ; "Configuration", Cont(`Config, c)
           ]
           (Break(None))
       | `Config ->
-        let opt x = (string_of_player x ^ ": " ^ string_of_real_ai (real_ai_of_player_config x c)), Cont((`RealAI(x), c)) in
+        let opt x = (string_of_player x ^ ": " ^ string_of_real_ai (real_ai_of_player_config x c)), Cont(`RealAI(x), c) in
           menu "Configuration"
           [ opt White
           ; opt Black
-          ; "Back", Cont((`Start, c))
+          ; "Back", Cont(`Start, c)
           ]
-          (Cont((`Start, c)))
+          (Cont(`Start, c))
       | `RealAI(p) ->
-        let opt x = string_of_real_ai x, Cont((`Config, config_change_player p c x)) in
+        let opt x = string_of_real_ai x, Cont(`Config, config_change_player p c x) in
           menu (string_of_player p ^ ": " ^ string_of_real_ai (real_ai_of_player_config p c))
           [ opt Real
           ; opt AI
-          ; "Back", Cont((`Config, c))
+          ; "Back", Cont(`Config, c)
           ]
-          (Cont((`Config, c)))
+          (Cont(`Config, c))
     )
     (`Start, {white=Real;black=Real})
