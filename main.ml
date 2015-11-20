@@ -7,7 +7,7 @@ open Default
 
 let () =
   init () ;
-  (* let _ = initmenu () in *)
+  let _ = initmenu () in
   loop_while (fun b ->
       match player_won b with
       | Some(p) -> display_win p; Break(())
