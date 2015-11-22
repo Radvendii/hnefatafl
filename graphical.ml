@@ -1,9 +1,22 @@
 open Helpers
 open Game_types
 open GUI
-open Graphics
 
 module GraphicsGUI : GUI = struct
+  module Graphics' = struct
+    include Graphics
+    let button_was_down = ref None
+    let button_pressed () =
+      let r = !button_was_down in
+      button_was_down := None; r
+    let _ =
+      Thread.create
+        (loop_while (fun () ->
+             let stat = wait_next_event [Button_down] in
+             button_was_down := Some(stat.mouse_x, stat.mouse_y);
+             Cont(()))) ()
+  end
+  open Graphics'
   let init () =
     open_graph "";
     auto_synchronize false;
@@ -81,19 +94,20 @@ module GraphicsGUI : GUI = struct
         draw_board s.board;
         match s.selected with
         | None ->
-          synchronize ();
-          (let stat = wait_next_event [Button_down; Key_pressed] in
-           if stat.keypressed
-           then
-             match stat.key with
+          (synchronize ();
+           if key_pressed () then
+             match read_key () with
              | 'q' | '\x1B' -> Break(Quit)
              | _ -> Cont(s)
            else
-             match pop_find (fun (_,c) -> c = (calc_inv_x stat.mouse_x, calc_inv_y stat.mouse_y) ) b.pieces with
-             | (_, None)      -> Cont(s)
-             | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
-                                      ; board = {b with pieces = ps}}))
-        | Some (p,c) ->
+             match button_pressed () with
+             | None -> Cont(s)
+             | Some(x,y) ->
+               (match pop_find (fun (_,c) -> c = (calc_inv_x x, calc_inv_y y) ) b.pieces with
+                | (_, None)      -> Cont(s)
+                | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
+                                         ; board = {b with pieces = ps}})))
+        | Some(p,c) ->
           let (x,y) = mouse_pos () in
           (if button_down ()
            then
@@ -160,24 +174,25 @@ module GraphicsGUI : GUI = struct
         identify boxes 0)
 
   let menu title options default =
-    let i_of_xy = draw_menu title (List.map fst options) (-1) in
+    (* let i_of_xy = draw_menu title (List.map fst options) (-1) in *)
+    (* loop_while (fun s -> *)
+    (*    let stat = wait_next_event [Button_down] in *)
+    (*    match i_of_xy (stat.mouse_x, stat.mouse_y) with *)
+    (*    | None -> Cont(-1) *)
+    (*    | Some(n) -> Break(snd (List.nth options n)) *)
+    (* ) (-1) *)
     loop_while (fun s ->
-       let stat = wait_next_event [Button_down] in
-       match i_of_xy (stat.mouse_x, stat.mouse_y) with
-       | None -> Cont(-1)
-       | Some(n) -> Break(snd (List.nth options n))
-    ) (-1)
-  (* loop_while (fun s -> *)
-    (*     if (wait_next_event [Button_down; Key_pressed; Poll]).button = true && s >= 0 *)
-    (*     then Break(snd (List.nth options s)) *)
-    (*     else *)
-    (*       ( *)
-    (*         let i_of_xy = draw_menu title (List.map fst options) s in *)
-    (*         match i_of_xy (mouse_pos ()) with *)
-    (*         | None -> Cont(-1) *)
-    (*         | Some(i) -> Cont(i) *)
-    (*       ) *)
-    (*   ) 0 *)
+        if button_pressed () <> None && s >= 0
+        then
+          Break(snd (List.nth options s))
+        else
+          (
+            let i_of_xy = draw_menu title (List.map fst options) s in
+            match i_of_xy (mouse_pos ()) with
+            | None -> Cont(-1)
+            | Some(i) -> Cont(i)
+          )
+      ) 0
 
   let display_win p = ()
 end
