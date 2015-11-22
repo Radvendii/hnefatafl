@@ -215,14 +215,17 @@ module GraphicsGUI : GUI = struct
 
   let menu title options default =
     loop_while (fun s ->
-        if button_pressed () <> None && s >= 0
-        then
-          Break(snd (List.nth options s))
-        else
-          let i_of_xy = draw_menu title (List.map fst options) s in
-          match i_of_xy (mouse_pos ()) with
-          | None -> Cont(-1)
-          | Some(i) -> Cont(i)
+        match key_pressed () with
+        | Some('q') | Some('\x1B') -> Break(default)
+        | Some(_) | None ->
+          if button_pressed () <> None && s >= 0
+          then
+            Break(snd (List.nth options s))
+          else
+            let i_of_xy = draw_menu title (List.map fst options) s in
+            match i_of_xy (mouse_pos ()) with
+            | None -> Cont(-1)
+            | Some(i) -> Cont(i)
       ) 0
 
   let display_win p = menu (string_of_player p ^ " wins!") ["play again", ()] ()
