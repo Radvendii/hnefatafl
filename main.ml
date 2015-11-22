@@ -6,12 +6,15 @@ open Menu
 open Default
 
 let () =
+  (* initialize graphics library *)
   init () ;
+  (* initial menu (configuration) for now, disregard configuration *)
   let _ = initmenu () in
   loop_while (fun b ->
       match player_won b with
       | Some(p) -> display_win p; Break(())
       | None ->
+        (* prompt user for input *)
         match board b with
         | Move(c1, c2) ->
           if not @@ valid_move c1 c2 b then Cont(b)
@@ -24,11 +27,14 @@ let () =
                   match p1 with
                   | None -> failwith "checked for in valid_move"
                   | Some(p1') ->
-                    let nps = (fst p1', c2)::ps' in (* move the piece!*)
+                    (* move the piece!*)
+                    let nps = (fst p1', c2)::ps' in
+                    (* remove captured pieces *)
                     let rps = piece_taken c2 {b with pieces = nps} in
                     List.filter (fun x -> not @@ List.mem (snd x) rps) nps
               }
         | Quit -> Break(())
         | Nop -> Cont(b)
     ) init_board ;
+  (* deinitialize graphics library *)
   deinit ()
