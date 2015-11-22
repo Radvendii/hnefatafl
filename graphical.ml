@@ -189,5 +189,5 @@ module GraphicsGUI : GUI = struct
           )
       ) 0
 
-  let display_win p = ()
+  let display_win p = menu (string_of_player p ^ " wins!") ["play again", ()] ()
 end
