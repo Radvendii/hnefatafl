@@ -150,19 +150,6 @@ module GraphicsGUI : GUI = struct
     let title_color = 0xDDDDDD in
     let selected_color = 0x2222DD in
     let item_color = 0xAAAAAA in
-    let menu_rect =
-      [ (0.1,0.1)
-      ; (0.9,0.1)
-      ; (0.9,0.9)
-      ; (0.1,0.9)
-      ] in
-    let menu_rect' = shift_points menu_rect (start_draw_x ()) (start_draw_y ()) (draw_len ()) (draw_len ()) in
-
-    (* draw box around/behind the menu *)
-    (* TODO: make this box a tighter fit *)
-    (* TRY: building up an IO () at the same time as the dimensions *)
-    set_color menu_color;
-    fill_poly (Array.of_list menu_rect');
 
     (* draw the menu items (including title) *)
     (* bound on the size of the box for the items *)
@@ -176,29 +163,44 @@ module GraphicsGUI : GUI = struct
         (* title gets a perfectly fit box, all menu items get the same size box *)
         let (bw,bh) = if i = 0 then (sw,sh) else str_bound in
         (* position the box in the middle of the screen *)
-        let bx = ((fst (List.nth menu_rect' 0) + fst (List.nth menu_rect' 1) - bw) / 2) in
+        let bx = ((size_x () - bw) / 2) in
         (* position it slightly below the previous item *)
-        let by = (snd (List.nth menu_rect' 2) - (spacing + (snd str_bound))*(i+1)) in
+        let by my mh = (my + mh - (spacing + (snd str_bound))*(i+1)) in
         (* string goes in the center of the box*)
-        let (sx,sy) = bx + (bw-sw)/2, by + (bh-sh)/2 in
-        set_color (if i = 0
-                   then title_color
-                   else
-                   if i = sel + 1
-                   then selected_color
-                   else item_color
-                  );
+        let sx = bx + (bw-sw)/2 in
+        let sy my mh = by my mh + (bh-sh)/2 in
+        let color_set () = set_color (if i = 0
+                                      then title_color
+                                      else
+                                      if i = sel + 1
+                                      then selected_color
+                                      else item_color
+                                     ) in
         (* draw box under menu item *)
-        fill_rect bx by bw bh;
-        (* draw menu item *)
-        moveto sx sy;
-        set_color black;
-        draw_string s;
-        (* return box dimensions *)
-        (bx,by,bw,bh)
-      ) (title::strs)
+        let draw_box my mh =
+          color_set ();
+          fill_rect bx (by my mh) bw bh;
+          set_color black in
+        (* draw whole menu item *)
+        let draw_item my mh =
+          draw_box my mh;
+          moveto sx (sy my mh);
+          draw_string s in
+        (* return box dimensions and function to draw items *)
+        ((bx,by,bw,bh), (fun my mh -> draw_item my mh))
+      )(title::strs)
       (* return a function that will tell you which menu item a coordinate is in *)
-    |> (fun boxes ->
+    |> List.split
+    |> (fun (boxes, draws) ->
+        let mw = List.fold_left (fun acc (_,_,w,_) -> max acc w) 0 boxes in
+        let mh = List.fold_left (fun acc (_,_,_,h) -> acc + h + spacing) 0 boxes in
+        let mx = (2 * start_draw_x () + draw_len () - mw)/2 in
+        let my = (2 * start_draw_y () + draw_len () - mh)/2 in
+        let boxes' = List.map (fun (bx,by,bw,bh) -> (bx,(by my mh),bw,bh)) boxes in
+        let draws' = List.map (fun f () -> f my mh) draws in
+        set_color menu_color;
+        fill_rect mx my mw mh;
+        List.iter (fun f -> f ()) draws';
         synchronize ();
         let rec identify bs i (x,y) =
           match bs with
@@ -211,7 +213,7 @@ module GraphicsGUI : GUI = struct
                y < by + bh
             then Some(i-1) (* title shift *)
             else identify bs' (i+1) (x,y) in
-        identify boxes 0)
+        identify boxes' 0)
 
   let menu title options default =
     loop_while (fun s ->
