@@ -192,8 +192,8 @@ module GraphicsGUI : GUI = struct
       (* return a function that will tell you which menu item a coordinate is in *)
     |> List.split
     |> (fun (boxes, draws) ->
-        let mw = List.fold_left (fun acc (_,_,w,_) -> max acc w) 0 boxes in
-        let mh = List.fold_left (fun acc (_,_,_,h) -> acc + h + spacing) 0 boxes in
+        let mw = spacing + List.fold_left (fun acc (_,_,w,_) -> max acc w) 0 boxes in
+        let mh = spacing + List.fold_left (fun acc (_,_,_,h) -> acc + h + spacing) 0 boxes in
         let mx = (2 * start_draw_x () + draw_len () - mw)/2 in
         let my = (2 * start_draw_y () + draw_len () - mh)/2 in
         let boxes' = List.map (fun (bx,by,bw,bh) -> (bx,(by my mh),bw,bh)) boxes in
