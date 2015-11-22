@@ -5,15 +5,23 @@ open GUI
 module GraphicsGUI : GUI = struct
   module Graphics' = struct
     include Graphics
+    let key_was_down = ref None
     let button_was_down = ref None
+    let key_pressed () =
+      let r = !key_was_down in
+      key_was_down := None; r
     let button_pressed () =
       let r = !button_was_down in
       button_was_down := None; r
     let _ =
       Thread.create
         (loop_while (fun () ->
-             let stat = wait_next_event [Button_down] in
-             button_was_down := Some(stat.mouse_x, stat.mouse_y);
+             let stat = wait_next_event [Button_down; Key_pressed] in
+             (if stat.button
+             then
+               button_was_down := Some(stat.mouse_x, stat.mouse_y)
+             else
+               key_was_down := Some(stat.key));
              Cont(()))) ()
   end
   open Graphics'
@@ -102,19 +110,18 @@ module GraphicsGUI : GUI = struct
     let handle_selection s =
       (* finish drawing the board *)
       synchronize ();
-      if key_pressed () then
-        match read_key () with
-        | 'q' | '\x1B' -> Break(Quit)
-        | _ -> Cont(s)
-      else
-        match button_pressed () with
-        | None -> Cont(s)
-        | Some(x,y) ->
-          (match pop_find (fun (_,c) -> c = (calc_inv_x x, calc_inv_y y) ) b.pieces with
-           (* someone selects an empty square or somewhere off the board *)
-           | (_, None)      -> Cont(s)
-           | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
-                                    ; board = {b with pieces = ps}})) in
+      match key_pressed () with
+        | Some('q') | Some('\x1B') -> Break(Quit)
+        | Some(_) | None ->
+          (* if the user isn't trying to quit, process mouse clicks *)
+          match button_pressed () with
+          | None -> Cont(s)
+          | Some(x,y) ->
+            (match pop_find (fun (_,c) -> c = (calc_inv_x x, calc_inv_y y) ) b.pieces with
+             (* someone selects an empty square or somewhere off the board *)
+             | (_, None)      -> Cont(s)
+             | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
+                                      ; board = {b with pieces = ps}})) in
 
     (* handle drag part of click-and-drag of pieces *)
     let handle_piece_move s p c =
