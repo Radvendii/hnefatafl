@@ -42,11 +42,6 @@ module GraphicsGUI : GUI = struct
     let (x',y',w,h) = (float_of_int x', float_of_int y', float_of_int w, float_of_int h) in
     List.map (fun (x,y) -> (int_of_float(x'+.w*.x), int_of_float(y'+.h*.y))) cs
 
-  let shift_box x y w h x' y' w' h' =
-    let (x',y',w',h') = (float_of_int x', float_of_int y', float_of_int w', float_of_int h') in
-    (int_of_float (x*.x'), int_of_float (y*.y'), int_of_float (w*.w'), int_of_float (h*.h'))
-
-
   let draw_piece p x y w h =
     let pawn_points' = Array.of_list @@ shift_points pawn_points x y w h in
     let king_points' = Array.of_list @@ shift_points king_points x y w h in
