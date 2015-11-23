@@ -1,4 +1,13 @@
-let main_init () = print_string "initial\n"
-let main_ref = ref main_init
-let main () = (!main_ref) ()
-let ch_main f = main_ref := f
+module type LibType = sig
+  val main : unit -> unit
+end
+
+module Library = struct
+  let main = ref(fun () -> print_string "initial\n")
+end
+
+let change (fcmod) =
+  let module L = (val fcmod : LibType) in
+  Library.main := L.main
+
+let main () = !(Library.main) ()
