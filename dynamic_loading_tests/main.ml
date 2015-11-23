@@ -1,2 +1,2 @@
 Dynlink.loadfile "_build/dynlib.cmo" ;
-Lib.main ()
+Lib.Library.main ()

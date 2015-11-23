@@ -1,13 +1,23 @@
 module type LibType = sig
-  val main : unit -> unit
+  val main : 'a -> unit
 end
 
-module Library = struct
-  let main = ref(fun () -> print_string "initial\n")
+(* module Library = struct *)
+(*   let main = ref(fun () -> print_string "initial\n") *)
+(* end *)
+
+module Dummy : LibType = struct
+  let main _ = ()
 end
+
+let modref = ref (module Dummy : LibType)
 
 let change (fcmod) =
-  let module L = (val fcmod : LibType) in
-  Library.main := L.main
+  modref := fcmod
 
-let main () = !(Library.main) ()
+module Library : LibType = struct
+  let main a =
+    let modval = !modref in
+    let module Mod = (val modval : LibType) in
+    (Mod.main) a
+end
