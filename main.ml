@@ -1,6 +1,8 @@
 open Helpers
 open Game_types
-open Graphical.GraphicsGUI
+open DynGUI.GUI
+DynGUI.load_GUI "ascii.cmo" ;
+(* open Graphical.GraphicsGUI *)
 (* open Ascii.AsciiGUI *)
 open Menu
 open Default
@@ -8,8 +10,8 @@ open Default
 let () =
   (* initialize graphics library *)
   init () ;
-  (* initial menu (configuration) for now, disregard configuration *)
   loop_while (fun () ->
+  (* initial menu (configuration) for now, disregard configuration *)
       match initmenu () with
       | None -> Break(())
       | Some(_) ->

@@ -1,2 +1,2 @@
-compile.opam_packages=termbox,graphics
+compile.opam_packages=termbox,graphics,dynlink
 compile.thread=true

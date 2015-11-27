@@ -1,7 +1,8 @@
 open Helpers
 open Game_types
+open DynGUI.GUI
 (* open Ascii.AsciiGUI *)
-open Graphical.GraphicsGUI
+(* open Graphical.GraphicsGUI *)
 
 type real_ai = | Real | AI
 let string_of_real_ai = function
