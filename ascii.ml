@@ -2,7 +2,7 @@ open Helpers
 open Game_types
 open GUI
 
-module AsciiGUI : GUI = struct
+module GUI : GUI = struct
   module Termbox' = struct (* extends termbox to keep track of screen, cursor*)
     (* HERE BE DRAGONS *)
     include Termbox
@@ -10,10 +10,10 @@ module AsciiGUI : GUI = struct
     let screen_h = 400
     let out_of_bounds (x,y) =
       not
-      (0 <= x       &&
-       0 <= y       &&
-       x < screen_w &&
-       y < screen_h)
+        (0 <= x       &&
+         0 <= y       &&
+         x < screen_w &&
+         y < screen_h)
     let screen = Array.make_matrix screen_w screen_h None
     let cursor = ref((1,1))
     let set_cursor x y =
@@ -82,14 +82,14 @@ module AsciiGUI : GUI = struct
 
   let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
     let rec char_list_helper x' y' cs =
-    match cs with
-    | [] -> ()
-    | c::cs' ->
-      match c with
-      | '\n' -> char_list_helper x (y'+1) cs'
-      | c    ->
-        set_cell_char ~fg:fg ~bg:bg x' y' c ;
-        char_list_helper (x'+1) y' cs' in
+      match cs with
+      | [] -> ()
+      | c::cs' ->
+        match c with
+        | '\n' -> char_list_helper x (y'+1) cs'
+        | c    ->
+          set_cell_char ~fg:fg ~bg:bg x' y' c ;
+          char_list_helper (x'+1) y' cs' in
     char_list_helper x y (char_list_of_string s)
 
   let draw_board b =

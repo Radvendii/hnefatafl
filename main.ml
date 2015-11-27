@@ -1,15 +1,18 @@
 open Helpers
 open Game_types
-open Graphical.GraphicsGUI
-(* open Ascii.AsciiGUI *)
+open GUI
+open GUI_list.GUI
+open GUI_list
 open Menu
 open Default
+
+let () = set_gui default_gui
 
 let () =
   (* initialize graphics library *)
   init () ;
-  (* initial menu (configuration) for now, disregard configuration *)
   loop_while (fun () ->
+  (* initial menu (configuration) for now, disregard configuration *)
       match initmenu () with
       | None -> Break(())
       | Some(_) ->
