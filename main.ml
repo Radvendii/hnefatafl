@@ -1,11 +1,12 @@
 open Helpers
 open Game_types
-open DynGUI.GUI
-DynGUI.load_GUI "ascii.cmo" ;
-(* open Graphical.GraphicsGUI *)
-(* open Ascii.AsciiGUI *)
+open GUI
+open GUI_list.GUI
+open GUI_list
 open Menu
 open Default
+
+let () = set_gui default_gui
 
 let () =
   (* initialize graphics library *)
