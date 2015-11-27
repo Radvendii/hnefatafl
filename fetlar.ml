@@ -67,6 +67,25 @@ let make_cross dir (x,y) b =
   |Left -> (piece_at (x-2,y) b, piece_at (x-1,y+1) b, piece_at (x-1,y-1) b)
   |Right -> (piece_at (x+2,y) b, piece_at (x+1,y+1) b, piece_at (x+1,y-1) b)
 
+(*Locations around the throne
+          5
+        2   1
+      6   x   8
+        3   4
+          7
+*)
+let check_center b (x,y) =
+  let center = (fst b.dims/2, snd b.dims/2) in
+  if (x-1,y-1) = center then 1
+  else if (x+1,y-1) = center then 2
+  else if (x+1,y+1) = center then 3
+  else if (x-1,y+1) = center then 4
+  else if (x,y-2) = center then 5
+  else if (x+2,y) = center then 6
+  else if (x,y+2) = center then 7
+  else if (x-2,y) = center then 8
+  else 0
+
 let check_capture_bpawn (dir:direction) (c:coord) (b:board) : coord list =
   match piece_at (step_dir dir c) b with
   |None -> []
@@ -86,22 +105,21 @@ let check_capture_bpawn (dir:direction) (c:coord) (b:board) : coord list =
     |Some WKing -> []
     end
   |Some WKing -> begin
-    let (x,y) = c in
-    let center = (fst b.dims/2, snd b.dims/2) in
+    let i = check_center b c in
     match (dir,make_cross dir c b) with
     |(_,(Some BPawn, Some BPawn, Some BPawn)) -> [step_dir dir c]
-    |(Up,(Some BPawn, Some BPawn, None))      -> if (x+1,y+1) = center then [step_dir dir c] else []
-    |(Up,(Some BPawn, None, Some BPawn))      -> if (x-1,y+1) = center then [step_dir dir c] else []
-    |(Up,(None, Some BPawn, Some BPawn))      -> if (x,y+2) = center then [step_dir dir c] else []
-    |(Down,(Some BPawn, Some BPawn, None))    -> if (x+1,y-1) = center then [step_dir dir c] else []
-    |(Down,(Some BPawn, None, Some BPawn))    -> if (x-1,y-1) = center then [step_dir dir c] else []
-    |(Down,(None, Some BPawn, Some BPawn))    -> if (x-2,y) = center then [step_dir dir c] else []
-    |(Left,(Some BPawn, Some BPawn, None))    -> if (x-1,y-1) = center then [step_dir dir c] else []
-    |(Left,(Some BPawn, None, Some BPawn))    -> if (x-1, y+1) = center then [step_dir dir c] else []
-    |(Left,(None, Some BPawn, Some BPawn))    -> if (x-2,y) = center then [step_dir dir c] else []
-    |(Right,(Some BPawn, Some BPawn, None))   -> if (x+1,y-1) = center then [step_dir dir c] else []
-    |(Right,(Some BPawn, None, Some BPawn))   -> if (x+1,y+1) = center then [step_dir dir c] else []
-    |(Right,(None, Some BPawn, Some BPawn))   -> if (x+1,y) = center then [step_dir dir c] else []
+    |(Up,(Some BPawn, Some BPawn, None))      -> if i=3 then [step_dir dir c] else []
+    |(Up,(Some BPawn, None, Some BPawn))      -> if i=4 then [step_dir dir c] else []
+    |(Up,(None, Some BPawn, Some BPawn))      -> if i=7 then [step_dir dir c] else []
+    |(Down,(Some BPawn, Some BPawn, None))    -> if i=2 then [step_dir dir c] else []
+    |(Down,(Some BPawn, None, Some BPawn))    -> if i=1 then [step_dir dir c] else []
+    |(Down,(None, Some BPawn, Some BPawn))    -> if i=5 then [step_dir dir c] else []
+    |(Left,(Some BPawn, Some BPawn, None))    -> if i=1 then [step_dir dir c] else []
+    |(Left,(Some BPawn, None, Some BPawn))    -> if i=4 then [step_dir dir c] else []
+    |(Left,(None, Some BPawn, Some BPawn))    -> if i=8 then [step_dir dir c] else []
+    |(Right,(Some BPawn, Some BPawn, None))   -> if i=2 then [step_dir dir c] else []
+    |(Right,(Some BPawn, None, Some BPawn))   -> if i=3 then [step_dir dir c] else []
+    |(Right,(None, Some BPawn, Some BPawn))   -> if i=6 then [step_dir dir c] else []
     |_ -> []
     end
 
