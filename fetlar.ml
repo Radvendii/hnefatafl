@@ -5,13 +5,13 @@ open Game_types
  *default setups of 11x11 board *
  *attackers move first *
  *restricted squares = throne, 4 corners
- *no pawn can occupy a restricted square
- *corner squares are hostile to all pieces
- *throne always hostile to attackers
- *throne hostile to defenders when empty
+ *no pawn can occupy a restricted square *
+ *corner squares are hostile to all pieces *
+ *throne always hostile to attackers *
+ *throne hostile to defenders when empty *
  *all pieces can move any number of spaces *
  *king may take part in captures *
- *King must move to any of the four corners
+ *King must move to any of the four corners *
  *attackers win if they capture king before escape
  *king capture on all four sides or 3 sides and throne
  *king cannot be captured on the edge
@@ -46,8 +46,15 @@ let init_board =
   |Some WPawn -> []
   |Some WKing -> []
   |Some BPawn -> begin
-    match piece_at (step_two_dir dir c) b with
-    |None -> []
+    let c' = step_two_dir dir c in
+    match piece_at c' b with
+    |None -> if c' = (0,0) ||
+              c' = (0,snd b.dims -1) ||
+              c' = (fst b.dims -1, 0) ||
+              c' = (fst b.dims -1, snd b.dims -1) ||
+              c' = (fst b.dims/2, snd b.dims/2)
+              then [step_dir dir c]
+              else []
     |Some WPawn -> [step_dir dir c]
     |Some BPawn -> []
     |Some WKing -> []
@@ -68,24 +75,37 @@ let check_capture_bpawn (dir:direction) (c:coord) (b:board) : coord list =
     let c' = step_two_dir dir c in
     match piece_at (c') b with
     |None -> if c' = (0,0) ||
-              c' = (0,snd b.dims) ||
-              c' = (fst b.dims, 0) ||
-              c' = b.dims
+              c' = (0,snd b.dims -1) ||
+              c' = (fst b.dims -1, 0) ||
+              c' = (fst b.dims -1, snd b.dims -1) ||
+              c' = (fst b.dims/2, snd b.dims/2)
               then [step_dir dir c]
               else []
     |Some BPawn -> [step_dir dir c]
     |Some WPawn -> []
     |Some WKing -> []
     end
-  |Some WKing -> begin
-    match make_cross dir c b with
-    |(Some BPawn, Some BPawn, Some BPawn) -> [step_dir dir c]
+  |Some WKing -> failwith "unfinished" (*begin
+    match (dir,make_cross dir c b) with
+    |(_,(Some BPawn, Some BPawn, Some BPawn)) -> [step_dir dir c]
+    |(Up,(Some BPawn, Some BPawn, None)) ->
+    |(Up,(Some BPawn, None, Some BPawn)) ->
+    |(Up,(None, Some BPawn, Some BPawn)) ->
+    |(Down,(Some BPawn, Some BPawn, None)) ->
+    |(Down,(Some BPawn, None, Some BPawn)) ->
+    |(Down,(None, Some BPawn, Some BPawn)) ->
+    |(Left,(Some BPawn, Some BPawn, None)) ->
+    |(Left,(Some BPawn, None, Some BPawn)) ->
+    |(Left,(None, Some BPawn, Some BPawn)) ->
+    |(Right,(Some BPawn, Some BPawn, None)) ->
+    |(Right,(Some BPawn, None, Some BPawn)) ->
+    |(Right,(None, Some BPawn, Some BPawn)) ->
+          if (step_two_dir dir c) = (fst b.dims/2, snd b.dims/2)
+          then [step_dir dir c]
+          else []
     |_ -> []
-    end
+    end*)
 
-(*Capturing of pieces,
- *the white king cannot participate in a capture both actively and passively
- *)
 let piece_taken ((x,y):coord) (b:board) : coord list =
   match piece_at (x,y) b with
   |None -> failwith "No piece here"
@@ -107,10 +127,6 @@ let rec find_wking (b:board) : coord option =
   |(WKing, (x,y))::ps -> Some (x,y)
   |p::ps -> find_wking {b with pieces = ps}
 
-(*Naive implementation of winning.
- *Black wins if the White King was captured
- *White wins if the White King gets to any edge square of the board
- *)
 let player_won (b:board) : player option =
   match find_wking b with
   |None -> Some Black
@@ -129,12 +145,12 @@ let valid_moves c1 b =
     else [] in
   (match piece_at c1 b with
    | None -> (fun _ -> [])
-   | WKing -> (fun x -> x)
-   |_ -> List.filter (fun c -> c <> (0,0) ||
-                      c <> (0,snd b.dims -1) ||
-                      c <> (fst b.dims -1, 0) ||
-                      c <> (fst b.dims -1, snd b.dims -1)
-                      c <> (b.dims/2, b.dims/2)))
+   | Some WKing -> (fun x -> x)
+   |_ -> List.filter (fun c -> c <> (0,0) &&
+                      c <> (0,snd b.dims -1) &&
+                      c <> (fst b.dims -1, 0) &&
+                      c <> (fst b.dims -1, snd b.dims -1) &&
+                      c <> (fst b.dims/2, snd b.dims/2)))
   @@
   List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
 
