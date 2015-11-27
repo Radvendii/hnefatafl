@@ -85,26 +85,25 @@ let check_capture_bpawn (dir:direction) (c:coord) (b:board) : coord list =
     |Some WPawn -> []
     |Some WKing -> []
     end
-  |Some WKing -> failwith "unfinished" (*begin
+  |Some WKing -> begin
+    let (x,y) = c in
+    let center = (fst b.dims/2, snd b.dims/2) in
     match (dir,make_cross dir c b) with
     |(_,(Some BPawn, Some BPawn, Some BPawn)) -> [step_dir dir c]
-    |(Up,(Some BPawn, Some BPawn, None)) ->
-    |(Up,(Some BPawn, None, Some BPawn)) ->
-    |(Up,(None, Some BPawn, Some BPawn)) ->
-    |(Down,(Some BPawn, Some BPawn, None)) ->
-    |(Down,(Some BPawn, None, Some BPawn)) ->
-    |(Down,(None, Some BPawn, Some BPawn)) ->
-    |(Left,(Some BPawn, Some BPawn, None)) ->
-    |(Left,(Some BPawn, None, Some BPawn)) ->
-    |(Left,(None, Some BPawn, Some BPawn)) ->
-    |(Right,(Some BPawn, Some BPawn, None)) ->
-    |(Right,(Some BPawn, None, Some BPawn)) ->
-    |(Right,(None, Some BPawn, Some BPawn)) ->
-          if (step_two_dir dir c) = (fst b.dims/2, snd b.dims/2)
-          then [step_dir dir c]
-          else []
+    |(Up,(Some BPawn, Some BPawn, None))      -> if (x+1,y+1) = center then [step_dir dir c] else []
+    |(Up,(Some BPawn, None, Some BPawn))      -> if (x-1,y+1) = center then [step_dir dir c] else []
+    |(Up,(None, Some BPawn, Some BPawn))      -> if (x,y+2) = center then [step_dir dir c] else []
+    |(Down,(Some BPawn, Some BPawn, None))    -> if (x+1,y-1) = center then [step_dir dir c] else []
+    |(Down,(Some BPawn, None, Some BPawn))    -> if (x-1,y-1) = center then [step_dir dir c] else []
+    |(Down,(None, Some BPawn, Some BPawn))    -> if (x-2,y) = center then [step_dir dir c] else []
+    |(Left,(Some BPawn, Some BPawn, None))    -> if (x-1,y-1) = center then [step_dir dir c] else []
+    |(Left,(Some BPawn, None, Some BPawn))    -> if (x-1, y+1) = center then [step_dir dir c] else []
+    |(Left,(None, Some BPawn, Some BPawn))    -> if (x-2,y) = center then [step_dir dir c] else []
+    |(Right,(Some BPawn, Some BPawn, None))   -> if (x+1,y-1) = center then [step_dir dir c] else []
+    |(Right,(Some BPawn, None, Some BPawn))   -> if (x+1,y+1) = center then [step_dir dir c] else []
+    |(Right,(None, Some BPawn, Some BPawn))   -> if (x+1,y) = center then [step_dir dir c] else []
     |_ -> []
-    end*)
+    end
 
 let piece_taken ((x,y):coord) (b:board) : coord list =
   match piece_at (x,y) b with
