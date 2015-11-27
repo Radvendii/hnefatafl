@@ -46,7 +46,3 @@ end
 
 let default_gui = "graphical", (module GUI_graphical.GUI : GUI)
 
-let gui_list =
-  [ "ascii", (module GUI_ascii.GUI : GUI)
-  ; "graphical", (module GUI_graphical.GUI : GUI)
-  ]
