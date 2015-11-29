@@ -3,10 +3,18 @@ open Game_types
 open GUI
 open GUI_list.GUI
 open GUI_list
+open MODE_list.Mode
+open MODE_list
 open Menu
-open Default
 
 let () = set_gui default_gui
+let () = set_mode default_mode
+
+  let valid_move c1 c2 b =
+    match piece_at c1 b with
+    |None -> false
+    |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
+    |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
 
 let () =
   (* initialize graphics library *)
@@ -15,7 +23,8 @@ let () =
   (* initial menu (configuration) for now, disregard configuration *)
       match initmenu () with
       | None -> Break(())
-      | Some(_) ->
+      | Some({mode;_}) ->
+        set_mode mode;
         loop_while (fun b ->
             match player_won b with
             | Some(p) -> display_win p; Break(())
@@ -41,7 +50,7 @@ let () =
                     }
               | Quit -> Break(())
               | Nop -> Cont(b)
-          ) init_board ;
+          ) (init_board ()) ;
         Cont(())
     ) ();
     (* deinitialize graphics library *)

@@ -1,8 +1,11 @@
 open Helpers
 open Game_types
 open GUI
+open Game_mode
 open GUI_list.GUI
 open GUI_list
+open MODE_list.Mode
+open MODE_list
 
 type real_ai = | Real | AI
 let string_of_real_ai = function
@@ -10,6 +13,7 @@ let string_of_real_ai = function
   | AI   -> "AI"
 type config = { white : real_ai
               ; black : real_ai
+              ; mode : string * (module Game_mode)
               }
 let real_ai_of_player_config p c =
   match p with
@@ -36,6 +40,7 @@ let initmenu () : config option =
           [ opt White
           ; opt Black
           ; ("GUI: " ^ fst (get_gui ())), Cont(`GUI, c)
+          ; ("Game Mode: " ^ fst c.mode), Cont(`Mode, c)
           ; "Back", Cont(`Start, c)
           ]
           (Cont(`Start, c))
@@ -56,5 +61,13 @@ let initmenu () : config option =
         set_gui gui;
         init ();
         Cont(`Config, c)
+      | `Mode ->
+        Cont(`Config,
+             {c with
+              mode =
+                menu ("Game Mode: " ^ fst c.mode)
+                  (List.map (fun (a,b) -> (a,(a,b))) mode_list)
+                  (get_mode ())
+             })
     )
-    (`Start, {white=Real;black=Real})
+    (`Start, {white=Real;black=Real;mode=(get_mode ())})

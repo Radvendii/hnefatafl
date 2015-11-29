@@ -2,7 +2,7 @@ open Game_types
 
 module type Game_mode = sig
   (* [init_board] is the initial board configuration for this game mode*)
-  val init_board  : board
+  val init_board  : unit -> board
 
   (* [valid_moves c b] is the list of coordinates the piece
    * on board [b] at coordinate [c] can go in one turn *)
