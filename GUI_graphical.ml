@@ -80,18 +80,20 @@ module GUI : GUI = struct
   type guistate = { selected : (piece * coord) option
                   ; board    : board}
 
-  (* length of one side of the drawing area.
-   * the margin is 1 / 20 of the smallest side *)
-  let draw_len () = min (size_x () * 19 / 20) (size_y () * 19 / 20)
-  (* bottom corner of the drawing area *)
-  let start_draw_x () = (size_x () - draw_len ()) /2
-  let start_draw_y () = (size_y () - draw_len ()) /2
 
   let board b =
     let (w,h) = b.dims in
     let size = max w h in
+    let turn_indic_len = 20 in
+    (* length of one side of the drawing area.
+     * the margin is 1 / 20 of the smallest side
+     * leave room at the bottom for drawing whose turn it is *)
+    let draw_len () = min (size_x () * 19 / 20) ((size_y () - (turn_indic_len + 20)) * 19 / 20) in
     (* side length for board squares *)
     let side_len () = draw_len () / size in
+    (* bottom corner of the drawing area *)
+    let start_draw_x () = (size_x () - draw_len ()) /2 in
+    let start_draw_y () = (size_y () - draw_len ()) /2 in
     (* calculate screen position for a board square *)
     let calc_x x = start_draw_x () + side_len () * x in
     let calc_y x = start_draw_y () + side_len () * x in
@@ -109,7 +111,14 @@ module GUI : GUI = struct
             (side_len ())
         ) (prod (0 -- (w-1)) (0 -- (h-1)));
       (* draw pieces *)
-      List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) (side_len ()) (side_len ())) b'.pieces in
+      List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) (side_len ()) (side_len ())) b'.pieces;
+      (* draw current turn *)
+      let piece_of_player = function
+        | White -> WPawn
+        | Black -> BPawn in
+      moveto (start_draw_x ()) (start_draw_y () - turn_indic_len);
+      draw_string "Turn: ";
+      draw_piece (piece_of_player b.turn) (current_x ()) (current_y () - 5) (turn_indic_len) (turn_indic_len) in
 
     (* handle click part of click-and-drag of pieces. Also quitting *)
     let handle_selection s =
@@ -199,8 +208,8 @@ module GUI : GUI = struct
     |> (fun (boxes, draws) ->
         let mw = spacing + List.fold_left (fun acc (_,_,w,_) -> max acc w) 0 boxes in
         let mh = spacing + List.fold_left (fun acc (_,_,_,h) -> acc + h + spacing) 0 boxes in
-        let mx = (2 * start_draw_x () + draw_len () - mw)/2 in
-        let my = (2 * start_draw_y () + draw_len () - mh)/2 in
+        let mx = (size_x () - mw)/2 in
+        let my = (size_y () - mh)/2 in
         let boxes' = List.map (fun (bx,by,bw,bh) -> (bx,(by my mh),bw,bh)) boxes in
         let draws' = List.map (fun f () -> f my mh) draws in
         set_color menu_color;
