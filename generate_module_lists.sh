@@ -1,13 +1,14 @@
+#!/usr/bin/env bash
 gui_entry(){
     local f=$1
-    local m=${f%.ml}
-    local n=${m#GUI_}
+    local n=${f%.ml}
+    local m=${n^}
     echo "\"$n\", (module $m.GUI : GUI)"
 }
 mode_entry(){
     local f=$1
-    local m=${f%.ml}
-    local n=${m#MODE_}
+    local n=${f%.ml}
+    local m=${n^}
     echo "\"$n\", (module $m.Mode : Game_mode)"
 }
 
@@ -15,16 +16,8 @@ cp GUI_list_template.ml GUI_list.ml
 printf "\nlet gui_list =\n  [ " >> GUI_list.ml
 
 first=1
-for f in $(ls | grep GUI_)
+for f in $(ls guis/)
 do
-    if [ "${f}" = "GUI_list.ml" ]
-    then
-        continue
-    fi
-    if [ "${f}" = "GUI_list_template.ml" ]
-    then
-        continue
-    fi
     if [ $first = 0 ]
     then
         printf "  ; " >> GUI_list.ml
@@ -38,17 +31,9 @@ printf "  ]" >> GUI_list.ml
 cp MODE_list_template.ml MODE_list.ml
 printf "\nlet mode_list =\n  [ " >> MODE_list.ml
 first=1
-for f in $(ls | grep MODE_)
+for f in $(ls game_modes/)
 do
-    if [ "${f}" = "MODE_list.ml" ]
-    then
-        continue
-    fi
-    if [ "${f}" = "MODE_list_template.ml" ]
-    then
-        continue
-    fi
-    if [ "${f}" = "MODE_berserk.ml" ]
+    if [ "${f}" = "berserk.ml" ]
     then
         continue
     fi

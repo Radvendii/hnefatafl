@@ -35,4 +35,4 @@ module Mode : Game_mode = struct
     Mod.player_won b
 end
 
-let default_mode = "default", (module MODE_default.Mode : Game_mode)
+let default_mode = "default", (module Default.Mode : Game_mode)

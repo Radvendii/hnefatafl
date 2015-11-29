@@ -93,6 +93,9 @@ module GUI : GUI = struct
     char_list_helper x y (char_list_of_string s)
 
   let draw_board b =
+    (* draw the cursor *)
+    let (x,y) = (get_cursor ()) in
+    set_cursor x y;
     (* draw the border *)
     clear () ;
     List.iter
@@ -116,6 +119,7 @@ module GUI : GUI = struct
 
 
   let draw_menu title strs (sel : int) =
+    hide_cursor ();
     clear ();
     set_cell_str ~fg:Green 0 0 title ;
     List.iteri (fun i ->

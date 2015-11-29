@@ -1,2 +1,3 @@
 compile.opam_packages=termbox,graphics
+compile.include_directories=guis,game_modes
 compile.thread=true
