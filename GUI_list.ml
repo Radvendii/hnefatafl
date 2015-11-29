@@ -23,23 +23,18 @@ let set_gui (modname, modval) =
 
 module GUI : GUI = struct
   let init () =
-    print_endline("init: " ^ fst (get_gui ()));
     let module Mod = (val modval () : GUI) in
     Mod.init ()
   let deinit () =
-    print_endline("deinit: " ^ fst (get_gui ()));
     let module Mod = (val modval () : GUI) in
     Mod.deinit ()
   let board b =
-    print_endline("board: " ^ fst (get_gui ()));
     let module Mod = (val modval () : GUI) in
     Mod.board b
   let menu t os d =
-    print_endline("menu: " ^ fst (get_gui ()));
     let module Mod = (val modval () : GUI) in
     Mod.menu t os d
   let display_win p =
-    print_endline("display_win: " ^ fst (get_gui ()));
     let module Mod = (val modval () : GUI) in
     Mod.display_win p
 end
