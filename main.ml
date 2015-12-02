@@ -34,7 +34,7 @@ let () =
               | Move(c1, c2) ->
                 if not @@ valid_move c1 c2 b then Cont(b)
                 else
-                let (pieces, n_taken) =
+                let (pieces, p, n_taken) =
                   let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
                   let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
                   match p1 with
@@ -45,13 +45,14 @@ let () =
                     (* remove captured pieces *)
                     let rps = piece_taken c2 {b with pieces = nps} in
                     (List.filter (fun x -> not @@ List.mem (snd x) rps) nps,
-                  List.length rps) in
+                      player_of_piece(fst p1'),
+                    List.length rps) in
                 Cont
                     { b with
                       turn = next_turn b.turn ;
                       pieces = pieces;
-                      captured = if fst p1' = BPawn then (n_taken + fst b.captured)
-                                  else (n_taken + snd b.captured)
+                      captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
+                                  else (fst b.captured, n_taken + snd b.captured)
                     }
               | Quit -> Break(())
               | Nop -> Cont(b)

@@ -21,6 +21,8 @@ val piece_at : coord -> board -> piece option
 
 val next_turn : player -> player
 
+val player_of_piece : piece -> player
+
 (* the actions that a user can perform when interacting with the game. *)
 type action =
   | Quit

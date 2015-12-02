@@ -4,6 +4,9 @@ let string_of_player = function
   | White -> "white"
   | Black -> "black"
 type piece  = | BPawn | WPawn | WKing
+let player_of_piece = function
+  | BPawn -> Black
+  | WPawn | WKing -> White
 
 type board  = { dims   : int * int
               ; pieces : (piece * coord) list
