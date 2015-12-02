@@ -1,4 +1,4 @@
-open Game_modes
+open Game_mode
 open Helpers
 open Game_types
 
@@ -34,7 +34,8 @@ let init_board =
 
       @
       [[WKing, (5,5)]]
-  ; turn = Black}
+  ; turn = Black
+  ; captured = (0,0)}
 
   let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
   match piece_at (step_dir dir c) b with
@@ -140,7 +141,7 @@ let rec find_wking (b:board) : coord option =
   |(WKing, (x,y))::ps -> Some (x,y)
   |p::ps -> find_wking {b with pieces = ps}
 
-let sort_into_indices a lst =
+let rec sort_into_indices a lst =
   match lst with
   |[] -> a
   |h::t -> Array.set a (fst (snd h)) (h::(Array.get a (fst (snd h))));

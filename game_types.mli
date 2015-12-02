@@ -12,6 +12,7 @@ type piece  = | BPawn | WPawn | WKing
 type board  = { dims   : int * int
               ; pieces : (piece * coord) list
               ; turn   : player
+              ; captured : int*int (*white gone,black gone*)
               }
 
 (* [piece_at c b] returns the piece at coordinate [c] on board [b]
