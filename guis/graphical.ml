@@ -39,8 +39,8 @@ module GUI : GUI = struct
 
   let deinit () = close_graph ()
 
-  (* points for the polygons to disply pieces *)
-  (* represente as fractions of a square *)
+  (* points for the polygons to display pieces *)
+  (* represent as fractions of a square *)
   let pawn_poly =
     [ (0.1,0.1)
     ; (0.9,0.1)
@@ -176,10 +176,11 @@ module GUI : GUI = struct
         let (sw,sh) = text_size s in
         (* title gets a perfectly fit box, all menu items get the same size box *)
         let (bw,bh) = if i = 0 then (sw,sh) else str_bound in
+        let (bw,bh) = (bw + 10, bh + 10) in
         (* position the box in the middle of the screen *)
         let bx = ((size_x () - bw) / 2) in
         (* position it slightly below the previous item *)
-        let by my mh = (my + mh - (spacing + (snd str_bound))*(i+1)) in
+        let by my mh = (my + mh - (spacing + bh)*(i+1)) in
         (* string goes in the center of the box*)
         let sx = bx + (bw-sw)/2 in
         let sy my mh = by my mh + (bh-sh)/2 in
@@ -193,7 +194,8 @@ module GUI : GUI = struct
         (* draw box under menu item *)
         let draw_box my mh =
           color_set ();
-          fill_rect bx (by my mh) bw bh;
+          (* fill_rect bx (by my mh) bw bh; *)
+          fill_ellipse ((2 * bx + bw) / 2) ((2 * by my mh + bh) / 2) (bw /2) (bh /2);
           set_color black in
         (* draw whole menu item *)
         let draw_item my mh =
