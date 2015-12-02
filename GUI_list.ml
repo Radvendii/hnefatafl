@@ -44,5 +44,4 @@ let default_gui = "graphical", (module Graphical.GUI : GUI)
 let gui_list =
   [ "ascii", (module Ascii.GUI : GUI)
   ; "graphical", (module Graphical.GUI : GUI)
-  ; "openGL", (module OpenGL.GUI : GUI)
   ]

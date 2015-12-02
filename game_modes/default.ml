@@ -36,7 +36,8 @@ module Mode : Game_mode = struct
 
         @
         [[WKing, (5,5)]]
-    ; turn = Black}
+    ; turn = Black
+    ; captured = (0,0)}
 
   let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
     match piece_at (step_dir dir c) b with

@@ -4,10 +4,14 @@ let string_of_player = function
   | White -> "white"
   | Black -> "black"
 type piece  = | BPawn | WPawn | WKing
+let player_of_piece = function
+  | BPawn -> Black
+  | WPawn | WKing -> White
 
 type board  = { dims   : int * int
               ; pieces : (piece * coord) list
               ; turn   : player
+              ; captured : int*int (*white gone,black gone*)
               }
 
 type action =
