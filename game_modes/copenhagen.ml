@@ -1,4 +1,4 @@
-open Game_modes
+open Game_mode
 open Helpers
 open Game_types
 
