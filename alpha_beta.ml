@@ -30,8 +30,14 @@ let utility (b:board) =
 
 let simple_move (b:board): action =
   let best_for_piece (b:board) (p:piece): action =
-    let treated_list = List.map (fun act -> (act, (utility (board_gen act)))
-    (valid_moves p d)) in
+    let treated_list =
+      match b.turn with
+        |White ->
+          List.map (fun act -> (act, (utility (board_gen act)))
+            (valid_moves p d))
+        |Black ->
+          List.map (fun act -> (act, ((-1)*utility (board_gen act)))
+            (valid_moves p d)) in
       let compare_moves (new_b) (acc) =
         (if (fst new_b > fst acc) then (new_b) else (acc)) in
           List.fold_left compare_moves (0, Nop) treated_list in
