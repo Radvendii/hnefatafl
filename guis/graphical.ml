@@ -17,16 +17,16 @@ module GUI : GUI = struct
       ignore @@
       Thread.create
         (loop_while (fun () ->
-            try
-              let stat = wait_next_event [Button_down; Key_pressed] in
-              (if stat.button
-               then
-                 let () = button_was_down := Some(stat.mouse_x, stat.mouse_y) in Cont(())
-               else
-                 let () = key_was_down := Some(stat.key) in Cont(()))
-            with
-            | _ -> Break(())
-        )) ()
+             try
+               let stat = wait_next_event [Button_down; Key_pressed] in
+               (if stat.button
+                then
+                  let () = button_was_down := Some(stat.mouse_x, stat.mouse_y) in Cont(())
+                else
+                  let () = key_was_down := Some(stat.key) in Cont(()))
+             with
+             | _ -> Break(())
+           )) ()
   end
   open Graphics'
   let init () =
