@@ -11,9 +11,27 @@
 
 \maketitle
 
-\section{Hnefatafl Game Dynamics}
-The game is played on an $11\times 11$ checkered board with two uneven sides.
-$12$ white pieces are positioned around a white ``king'' at the center of the
+\section{Structure of the Implementation}
+The Hnefatafl game that we created is a historic Viking game with several different play modes.
+The board game was created by the Vikings and is meant to simulate the defense and attack
+of two uneven sides.  The defenders goal is to protect their king and move the king to specific
+locations on the board.  The attacks want to capture the king.  Because this is a historic
+game, there are several different versions (we call them modes).
+The modes differ in their rule sets and initial configurations.
+They are each described in detail below. To increase the complexity of the game, we implemented
+TWO/THREE different game modes.  We allow the player
+to decide, at runtime, what version on the game they would like to play.  The rules
+and intial setup of the game are then loaded into the main backend program and the player
+can begin.
+
+\section{Hnefatafl Game Mode Descriptions}
+\subsection{CS3110 Hnefatafl}
+We created this version of the game after our inital study of the rules.  After further study
+we realized that this game mode is not as accurate historically as Fetlar.  For this reason, we
+are leaving this mode of the game as the default (because it is the easiest to explain and understand)
+but naming it CS3110 Hnefatafl (because it does not perfectly match any true rule set).\\
+The game is played on an $7\times 7$ checkered board with two uneven sides.
+$8$ white pieces are positioned around a white ``king'' at the center of the
 board, with $24$ black pieces arranged on the edges surrounding them.
 See~\ref{fig:initial_position}.
 \begin{figure}\label{fig:initial_position}

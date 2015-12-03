@@ -17,25 +17,24 @@ open Game_mode
 
 module Mode : Game_mode = struct
   let init_board () =
-    { dims = (11,11)
+    { dims = (9,9)
     ; pieces =
         List.flatten @@
         List.map (List.map (fun c -> BPawn, c))
-          [ prod (3--7) [0;10]
-          ; prod [0;10] (3--7)
-          ; prod [1;9] [5]
-          ; prod [5] [1;9]
+          [ prod (3--5) [0;8]
+          ; prod [0;8] (3--5)
+          ; prod [1;7] [4]
+          ; prod [4] [1;7]
           ]
 
         @
         List.map (List.map (fun c -> WPawn, c))
-          [ List.filter ((<>)(5,5)) (prod (4--6) (4--6))
-          ; prod [3;7] [5]
-          ; prod [5] [3;7]
+          [ List.filter ((<>),(4,4)) (prod (2--6) [4])
+          ; List.filter ((<>)(4,4)) (prod [4] (2--6))
           ]
 
         @
-        [[WKing, (5,5)]]
+        [[WKing, (4,4)]]
     ; turn = Black
     ; captured = (0,0)}
 
