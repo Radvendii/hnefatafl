@@ -29,7 +29,7 @@ module Mode : Game_mode = struct
 
         @
         List.map (List.map (fun c -> WPawn, c))
-          [ List.filter ((<>),(4,4)) (prod (2--6) [4])
+          [ List.filter ((<>)(4,4)) (prod (2--6) [4])
           ; List.filter ((<>)(4,4)) (prod [4] (2--6))
           ]
 
