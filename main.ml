@@ -7,9 +7,6 @@ open MODE_list.Mode
 open MODE_list
 open Menu
 
-let () = set_gui default_gui
-let () = set_mode default_mode
-
   let valid_move c1 c2 b =
     match piece_at c1 b with
     |None -> false

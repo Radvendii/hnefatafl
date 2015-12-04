@@ -62,7 +62,7 @@ let initmenu () : config option =
         (* menu to select gui *)
         let gui =
           menu ("GUI: " ^ fst (get_gui ()))
-            (List.map (fun (a,b) -> (a,(a,b))) gui_list)
+            (List.map (fun g -> (string_of_gui g, g)) gui_list)
             (get_gui ()) in
         (* switches to that gui *)
         deinit ();
@@ -74,7 +74,7 @@ let initmenu () : config option =
              {c with
               mode =
                 menu ("Game Mode: " ^ fst c.mode)
-                  (List.map (fun (a,b) -> (a,(a,b))) mode_list)
+                  (List.map (fun m -> (string_of_mode m, m)) mode_list)
                   (get_mode ())
              })
     )
