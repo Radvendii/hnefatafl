@@ -190,8 +190,7 @@ module GUI : GUI = struct
       GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
       match piece_at c b with
       | None -> ()
-      | Some(p) ->
-      draw_piece ~alpha:0.8 p);
+      | Some(p) -> draw_piece ~alpha:0.8 p);
 
     (* draw game board *)
     GlMat.mode `modelview;
