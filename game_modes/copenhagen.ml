@@ -303,16 +303,6 @@ module Mode : Game_mode = struct
     |(WKing, (x,y))::ps -> Some (x,y)
     |p::ps -> find_wking {b with pieces = ps}
 
-  let player_won (b:board) : player option =
-    match find_wking b with
-    |None -> Some Black
-    |Some c -> if c = (0,0) ||
-                c = ((fst b.dims)-1,0) ||
-                c = ((fst b.dims)-1,(snd b.dims)-1) ||
-                c = (0,(snd b.dims)-1)
-                then Some White
-                else None
-
   let valid_moves c1 b =
     let rec helper c2 dir =
       let c2' = step_dir dir c2 in
@@ -335,4 +325,15 @@ module Mode : Game_mode = struct
     |None -> false
     |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
     |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
+
+  let player_won (b:board) : player option =
+    match find_wking b with
+    |None -> Some Black
+    |Some c -> if c = (0,0) ||
+                c = ((fst b.dims)-1,0) ||
+                c = ((fst b.dims)-1,(snd b.dims)-1) ||
+                c = (0,(snd b.dims)-1)
+                then Some White
+                else if List.length valid_moves c b = 0 then Some Black
+                else None
 end
