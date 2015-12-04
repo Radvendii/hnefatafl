@@ -12,7 +12,8 @@ let rec find_wking (b:board) : coord option =
 let white_util (b:board) : int =
  match (find_wking b) with
   | None -> failwith "No King. This isnt a fucking democracy. White Looses"
-  | Some (x,y) -> if (x = (fst b.dims)/2) &&
+  | Some (x,y) ->
+                  if (x = (fst b.dims)/2) &&
                      (y = (snd b.dims)/2) then 0
                   else
                       let x_out = abs (x-((fst b.dims)/2)) in
@@ -22,6 +23,17 @@ let white_util (b:board) : int =
                     if x_out < y_out then y_out
                   else
                     if (Random.bool ()) then x_out else y_out
+
+(*
+(*Black Utility Extras*)
+let m_distance c1 c2 =
+    ((abs(fst c1 - fst c2)) + (abs(snd c1 - snd c2)))
+
+let net_king_distance (b:board) : int =
+  let king_cords = find_wking b
+  let b_pieces = match
+  List.map m_distance b.pieces
+*)
 
 let black_util (b:board) : int =
   (*white_pieces_caputred - black_pieces_captured*)
@@ -47,4 +59,3 @@ let simple_move (b:board): action =
     List.fold_left compare_moves (Nop,0) treated_list in
   let treated_piece_list = List.map best_for_piece b.pieces in
     fst (List.fold_left compare_moves (Nop,0) treated_piece_list)
-
