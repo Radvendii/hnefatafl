@@ -126,30 +126,19 @@ module GUI : GUI = struct
   (* colors *)
   let white_color = (0.4, 0.4, 0.4)
   let black_color = (0.08, 0.08, 0.08)
-  let white_selected_color = (0.6, 0.6, 0.6)
-  let black_selected_color = (0.3, 0.3, 0.3)
 
-  let draw_piece selected p =
+  let draw_piece ?(alpha=1.0) p =
     GlDraw.begins `triangles;
     (
       match p with
       | WPawn ->
-        GlDraw.color
-          (if selected
-           then white_selected_color
-           else white_color);
+        GlDraw.color ~alpha:alpha white_color;
         List.iter normal_vertex3 Pawn.Data.vertex_list
       | BPawn ->
-        GlDraw.color
-          (if selected
-           then black_selected_color
-           else black_color);
+        GlDraw.color ~alpha:alpha black_color;
         List.iter normal_vertex3 Pawn.Data.vertex_list
       | WKing ->
-        GlDraw.color
-          (if selected
-           then white_selected_color
-           else white_color);
+        GlDraw.color ~alpha:alpha white_color;
         List.iter normal_vertex3 King.Data.vertex_list
     );
     GlDraw.ends ()
@@ -195,21 +184,15 @@ module GUI : GUI = struct
     transform_to_square !cursor;
     draw_cursor ();
 
-    (* draw light at selected piece
-     * this must be done *before* any
-     * pieces are drawn so that it will actually light them up
-     * (stupid imperative state) *)
     (match selected with
-     | Some(i,j) ->
-       transform_to_square (i,j);
-       Gl.enable `light3;
-       (* supposed to look like a small light at this location
-        * in reality, spotlight shining down on it. *)
-       GlLight.light ~num:3 (`diffuse (0.0,0.0,0.5,1.0));
-       GlLight.light ~num:3 (`position(0.0,0.0,-5.0,1.0));
-       GlLight.light ~num:3 (`spot_cutoff 15.0);
-       GlLight.light ~num:3 (`spot_direction (0.0,0.0,1.0));
-     | None -> Gl.disable `light3);
+    | None -> Gl.disable `blend;
+    | Some(c) ->
+      Gl.enable `blend;
+      GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
+      match piece_at c b with
+      | None -> ()
+      | Some(p) ->
+      draw_piece ~alpha:0.8 p);
 
     (* draw game board *)
     GlMat.mode `modelview;
@@ -248,17 +231,9 @@ module GUI : GUI = struct
     (* draw pieces *)
     List.iter (fun (p, (i,j)) ->
         transform_to_square (i,j);
-        (* selected piece is glowing
-         * also a slightly different color
-         * because glowing black pieces look
-         * AWFUL *)
         (if selected = Some(i,j)
-         then
-           (GlLight.material `both (`emission (0.0,0.0,0.2,1.0));
-            draw_piece true p)
-         else
-           draw_piece false p);
-        GlLight.material `both (`emission (0.0,0.0,0.0,0.0))
+         then draw_piece ~alpha:0.5
+         else draw_piece ~alpha:1.0) p;
       ) b.pieces;
     Gl.flush ();
     Sdlgl.swap_buffers ()
