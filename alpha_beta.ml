@@ -3,10 +3,6 @@ open Main
 open Game_types
 open MODE_list
 
-type win = int 2
-type draw = int 1
-type loss = int 0
-
 let rec find_wking (b:board) : coord option =
   match b.pieces with
   |[] -> None
@@ -15,7 +11,7 @@ let rec find_wking (b:board) : coord option =
 
 let white_util (b:board) : int =
  match (find_wking b) with
-  | None -> failwith "No King. This isnt a fucking democracy. You lose"
+  | None -> failwith "No King. This isnt a fucking democracy. White Looses"
   | Some (x,y) -> if (x = (fst b.dims)/2) &&
                      (y = (snd b.dims)/2) then 0
                   else
