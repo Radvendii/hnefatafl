@@ -37,7 +37,130 @@ module Mode : Game_mode = struct
     ; turn = Black
     ; captured = (0,0)}
 
-    let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
+  let rec am_i_in_shieldwall (dir:direction) ((x,y):coord) (b:board) : (bool * (coord list)) =
+    match ((piece_at (x,y) b), x, y) with
+    |(Some BPawn,0,_) -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x+1,y) b in
+                          if a = Some BPawn && (c = Some WPawn || c = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if a = Some WPawn && (c = Some WPawn || c = Some WKing)
+                          then (true, [(x,y)])
+                        else if a = None && (c = Some WPawn || c = Some WKing)
+                          then (step_dir dir (x,y) = (0, snd b.dims-1) || step_dir dir (x,y) = (0,0), [(x,y)])
+                        else (false, [])
+    |(Some BPawn, j,_) when j = fst b.dims -1 -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x-1,y) b in
+                          if a = Some BPawn && (c = Some WPawn || c = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if a = Some WPawn && (c = Some WPawn || c = Some WKing)
+                          then (true, [(x,y)])
+                        else if a = None && (c = Some WPawn || c = Some WKing)
+                          then (step_dir dir (x,y)= (fst b.dims-1, 0) || step_dir dir (x,y) = (fst b.dims-1,snd b.dims-1), [(x,y)])
+                        else (false, [])
+    |(Some BPawn,_,0) -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y+1) b in
+                          if a = Some BPawn && (c = Some WPawn || c = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if a = Some WPawn && (c = Some WPawn || c = Some WKing)
+                          then (true, [(x,y)])
+                        else if a = None && (c = Some WPawn || c = Some WKing)
+                          then (step_dir dir (x,y)= (fst b.dims-1, 0) || step_dir dir (x,y) = (0,0), [(x,y)])
+                        else (false, [])
+    |(Some BPawn,_,j) when j = snd b.dims -1 -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y-1) b in
+                          if a = Some BPawn && (c = Some WPawn || c = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if a = Some WPawn && (c = Some WPawn || c = Some WKing)
+                          then (true, [(x,y)])
+                        else if a = None && (c = Some WPawn || c = Some WKing)
+                          then (step_dir dir (x,y) = (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (0,snd b.dims-1), [(x,y)])
+                        else (false, [])
+    |(Some WPawn,0,_) |(Some WKing,0,_) -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x+1,y) b in
+                          if c = Some BPawn && (a = Some WPawn || a = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [(x,y)])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y) = (0, snd b.dims-1) || step_dir dir (x,y) = (0,0), [(x,y)])
+                        else (false, [])
+    |(Some WPawn,j,_) |(Some WKing,j,_) when j = fst b.dims -1->
+                          let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x-1,y) b in
+                          if c = Some BPawn && (a = Some WPawn || a = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [(x,y)])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (fst b.dims-1,0), [(x,y)])
+                        else (false, [])
+    |(Some WPawn,_,0) |(Some WKing,_,0) ->let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y+1) b in
+                          if c = Some BPawn && (a = Some WPawn || a = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [(x,y)])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1,0) || step_dir dir (x,y)= (0,0), [(x,y)])
+                        else (false, [])
+    |(Some WPawn,_,j) |(Some WKing,_,j) when j = snd b.dims -1 ->
+                        let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y-1) b in
+                          if c = Some BPawn && (a = Some WPawn || a = Some WKing)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (x,y)::(snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [(x,y)])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (0,snd b.dims-1), [(x,y)])
+                        else (false, [])
+    |_ -> (false,[])
+
+  let check_shieldwall (dir:direction) ((x,y):coord) (b:board) : coord list =
+    match (dir, x, y) with
+    |(Up, 0, _)-> let s = am_i_in_shieldwall dir (0, y+1) b in if fst s then snd s else []
+    |(Up, j, _) when j = fst b.dims -1->
+                              let s = am_i_in_shieldwall dir (fst b.dims-1, y+1) b in
+                                if fst s then snd s else []
+    |(Up, _, j) when j = snd b.dims -2 ->
+                            let s = am_i_in_shieldwall Left (x, y+1) b in
+                                let t = am_i_in_shieldwall Right (x,y+1) b in
+                                if fst s && fst t then snd s @ snd t else []
+    |(Down, 0, _) -> let s = am_i_in_shieldwall dir (0, y-1) b in if fst s then snd s else []
+    |(Down, j, _) when j = fst b.dims -1->
+                              let s = am_i_in_shieldwall dir (fst b.dims-1, y-1) b in
+                                if fst s then snd s else []
+    |(Down, _, j) when j = snd b.dims -2 ->
+                              let s = am_i_in_shieldwall Left (x, y-1) b in
+                                let t = am_i_in_shieldwall Right (x,y-1) b in
+                                if fst s && fst t then snd s @ snd t else []
+    |(Left, 1, _)-> let s = am_i_in_shieldwall Up (0, y) b in
+                                let t = am_i_in_shieldwall Down (0,y) b in
+                                if fst s && fst t then snd s @ snd t else []
+    |(Left, _, 0) -> let s = am_i_in_shieldwall dir (x-1, y) b in
+                                if fst s then snd s else []
+    |(Left, _, j) when j = snd b.dims-1 ->
+                                let s = am_i_in_shieldwall dir (x-1, y) b in
+                                if fst s then snd s else []
+    |(Right, j, _) when j = snd b.dims -2 ->
+                              let s = am_i_in_shieldwall Up (snd b.dims-1, y) b in
+                                let t = am_i_in_shieldwall Down (snd b.dims-1,y) b in
+                                if fst s && fst t then snd s @ snd t else []
+    |(Right, _, 0) -> let s = am_i_in_shieldwall dir (x+1, y) b in
+                                if fst s then snd s else []
+    |(Right, _, j) when j = snd b.dims-1 ->
+                            let s = am_i_in_shieldwall dir (x+1, y) b in
+                                if fst s then snd s else []
+    |_ -> []
+
+  let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
     match piece_at (step_dir dir c) b with
     |None -> []
     |Some WPawn -> []
@@ -51,9 +174,9 @@ module Mode : Game_mode = struct
                 c' = (fst b.dims -1, snd b.dims -1) ||
                 c' = (fst b.dims/2, snd b.dims/2)
                 then [step_dir dir c]
-                else []
+                else check_shieldwall dir c b
       |Some WPawn -> [step_dir dir c]
-      |Some BPawn -> []
+      |Some BPawn -> check_shieldwall dir c b
       |Some WKing -> []
     end
 
@@ -96,9 +219,9 @@ module Mode : Game_mode = struct
                 c' = (fst b.dims -1, snd b.dims -1) ||
                 c' = (fst b.dims/2, snd b.dims/2)
                 then [step_dir dir c]
-                else []
+                else check_shieldwall dir (step_dir dir c) b
       |Some BPawn -> [step_dir dir c]
-      |Some WPawn -> []
+      |Some WPawn -> check_shieldwall dir (step_dir dir c) b
       |Some WKing -> []
       end
     |Some WKing -> begin
@@ -140,25 +263,6 @@ module Mode : Game_mode = struct
     |[] -> None
     |(WKing, (x,y))::ps -> Some (x,y)
     |p::ps -> find_wking {b with pieces = ps}
-
-  let rec sort_into_indices a lst =
-    match lst with
-    |[] -> a
-    |h::t -> Array.set a (fst (snd h)) (h::(Array.get a (fst (snd h))));
-              sort_into_indices a t
-
-  (*let black_surrounded_all_white (b:board) (c:coord) :bool =
-    let all_white = List.filter (fun x -> fst x = WPawn || fst x = WKing) in
-    let all_black = List.filter (fun x -> fst x = BPawn) in
-    let a = Array.make (fst b.dims) [] in
-    let sorted_black = sort_into_indices a all_black in
-    let sorted_white = sort_into_indices a all_white in
-    let black_is_first = ref false in
-    let black_surrounds = ref false in
-    let black_is_last = ref false in
-    for i = 0 to fst b.dims do
-
-    done*)
 
   let player_won (b:board) : player option =
     match find_wking b with
