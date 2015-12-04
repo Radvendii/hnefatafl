@@ -1,9 +1,8 @@
 open GUI
 open Game_types
-open MODE_list
 
 let board_gen b a =
-  match board_gen b a with
+  match MODE_list.board_gen b a with
   | None -> failwith "AI should not be trying to Quit"
   | Some(b) -> b
 
@@ -72,10 +71,10 @@ let board (b:board): action =
     let treated_list =
       (match b.turn with
         |White ->
-        List.map (fun act -> (act,(utility (MODE_list.board_gen b act))))
+        List.map (fun act -> (act,(utility (board_gen b act))))
         (action_space)
         |Black ->
-        List.map (fun act -> (act,((-1)*utility (MODE_list.board_gen b act))))
+        List.map (fun act -> (act,((-1)*utility (board_gen b act))))
             (action_space)) in
     List.fold_left compare_moves (Nop,0) treated_list in
   let treated_piece_list = List.map best_for_piece ((random_prune (0.9) (b.pieces))) in
