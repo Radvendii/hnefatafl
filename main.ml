@@ -17,7 +17,7 @@ let () =
   (* initialize graphics library *)
   init () ;
   loop_while (fun () ->
-  (* initial menu (configuration) for now, disregard configuration *)
+      (* initial menu (configuration) *)
       match initmenu () with
       | None -> Break(())
       | Some({mode;white;black}) ->
@@ -30,37 +30,24 @@ let () =
             | Some(p) -> display_win p; Break(())
             | None ->
               (* prompt user for input *)
-              match if ((real_ai_of_player b.turn) = Real)
-                then board b
-                else (Alpha_beta.board b)
-               with
-              | Move(c1, c2) ->
-                if not @@ valid_move c1 c2 b then Cont(b)
-                else
-                let (pieces, p, n_taken) =
-                  let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-                  let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-                  match p1 with
-                  | None -> failwith "checked for in valid_move"
-                  | Some(p1') ->
-                    (* move the piece!*)
-                    let nps = (fst p1', c2)::ps' in
-                    (* remove captured pieces *)
-                    let rps = piece_taken c2 {b with pieces = nps} in
-                    (List.filter (fun x -> not @@ List.mem (snd x) rps) nps,
-                      player_of_piece(fst p1'),
-                    List.length rps) in
-                Cont
-                    { b with
-                      turn = other_player b.turn ;
-                      pieces = pieces;
-                      captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
-                                  else (fst b.captured, n_taken + snd b.captured)
-                    }
-              | Quit -> Break(())
-              | Nop -> Cont(b)
+              match
+                (
+                  (* generate the new board from the returned action*)
+                  board_gen
+                    (
+                      (* if this turn belongs to a player *)
+                    if (real_ai_of_player b.turn = Real)
+                    (* then prompt the player *)
+                    then board b
+                    (* otherwise give it to the AI *)
+                    else Alpha_beta.board b
+                    )
+                )
+              with
+              | None -> Break(())
+              | Some(b) -> Cont(b)
           ) (init_board ()) ;
         Cont(())
     ) ();
-    (* deinitialize graphics library *)
-    deinit ()
+  (* deinitialize graphics library *)
+  deinit ()
