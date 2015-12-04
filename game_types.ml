@@ -34,6 +34,6 @@ let rec piece_at c b =
     then Some(p)
     else piece_at c {b with pieces = ps}
 
-let next_turn = function
+let other_player = function
   | White -> Black
   | Black -> White

@@ -1,25 +1,28 @@
+(* NOTE: Do NOT edit MODE_list.ml
+ * to make changes that last, edit MODE_list_template.ml
+ * and regenerate MODE_list.ml with generate_module_lists.sh *)
 open Game_mode
+open Game_types
+open Helpers
 
-module Dummy : Game_mode = struct
-  let fail () = failwith("Must be dynamically replaced")
-  let init_board _    = fail ()
-  let valid_moves _ _ = fail ()
-  let piece_taken _ _ = fail ()
-  let player_won _    = fail ()
-end
+let default_mode = "CS3110", (module Default.Mode : Game_mode)
 
-let modref = ref(module Dummy : Game_mode)
+let modref = ref(fst default_mode, module (snd default_mode) : GUI)
 
-let nameref = ref("Dummy")
+let get_mode () = !modref
 
-let get_mode () = (!nameref, !modref)
+let modval () = snd (get_mode ())
 
-let modval () = !modref
+let string_of_mode = fst
 
-let set_mode (modname, modval) =
-  nameref := modname;
-  modref  := modval
+let module_of_mode = snd
 
+let set_mode mode =
+  modref := mode
+
+(* this module just refers to the dynamically loaded module
+ * it is necessary to setup the module within every function
+ * because it must be set up at runtime *)
 module Mode : Game_mode = struct
   let init_board () =
     let module Mod = (val modval () : Game_mode) in
@@ -35,4 +38,28 @@ module Mode : Game_mode = struct
     Mod.player_won b
 end
 
-let default_mode = "CS3110", (module Default.Mode : Game_mode)
+(* calculate the next board state given an attempted move
+ * integrating all of the Game_mode functions
+ * of the currently loaded Game_mode module
+ * returns None if the action is Quit*)
+let board_gen (b:board) (a:action) : board option =
+  let module Mod = (val modval (): Game_mode) in
+  let open Mod in
+  match a with
+            | Move(c1, c2) ->
+                  { b with
+                    turn = next_turn b.turn ;
+                    pieces =
+                      let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+                      let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+                      match p1 with
+                      | None -> failwith "checked for in valid_move"
+                      | Some(p1') ->
+                        (* move the piece!*)
+                        let nps = (fst p1', c2)::ps' in
+                        (* remove captured pieces *)
+                        let rps = piece_taken c2 {b with pieces = nps} in
+                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
+                  }
+            | Nop -> b
+            | Quit -> None

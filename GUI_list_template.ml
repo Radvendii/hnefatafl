@@ -1,26 +1,26 @@
+(* NOTE: Do NOT edit GUI_list.ml
+ * to make changes that last, edit GUI_list_template.ml
+ * and regenerate GUI_list.ml with generate_module_lists.sh *)
 open GUI
 
-module Dummy : GUI = struct
-  let fail () = failwith("Must be dynamically replaced")
-  let init _        = fail ()
-  let deinit _      = fail ()
-  let board _       = fail ()
-  let menu _ _ _    = fail ()
-  let display_win _ = fail ()
-end
+let default_gui = "3D", (module ThreeD.GUI : GUI)
 
-let modref = ref(module Dummy : GUI)
+let modref = ref(fst default_gui, module (snd default_gui) : GUI)
 
-let nameref = ref("Dummy")
+let get_gui () = !modref
 
-let get_gui () = (!nameref, !modref)
+let string_of_gui = fst
 
-let modval () = !modref
+let module_of_gui = snd
 
-let set_gui (modname, modval) =
-  nameref := modname;
-  modref  := modval
+let modval () = snd (get_gui ())
 
+let set_gui gui =
+  modref := gui
+
+(* this module just refers to the dynamically loaded module
+ * it is necessary to setup the module within every function
+ * because it must be set up at runtime *)
 module GUI : GUI = struct
   let init () =
     let module Mod = (val modval () : GUI) in
@@ -38,5 +38,3 @@ module GUI : GUI = struct
     let module Mod = (val modval () : GUI) in
     Mod.display_win p
 end
-
-let default_gui = "3D", (module ThreeD.GUI : GUI)

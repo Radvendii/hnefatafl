@@ -19,7 +19,7 @@ type board  = { dims   : int * int
  * or None if there is no piece there. *)
 val piece_at : coord -> board -> piece option
 
-val next_turn : player -> player
+val other_player : player -> player
 
 val player_of_piece : piece -> player
 

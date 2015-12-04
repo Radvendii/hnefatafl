@@ -55,7 +55,7 @@ let () =
                     List.length rps) in
                 Cont
                     { b with
-                      turn = next_turn b.turn ;
+                      turn = other_player b.turn ;
                       pieces = pieces;
                       captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
                                   else (fst b.captured, n_taken + snd b.captured)

@@ -2,10 +2,10 @@ open Game_types
 
 module type GUI = sig
   (* initializes the GUI libary for this GUI. *)
-  val init       : unit -> unit
+  val init : unit -> unit
 
   (* deinitializes the GUI library for this GUI. *)
-  val deinit     : unit -> unit
+  val deinit : unit -> unit
 
   (* [board b] presents the board to the user, and prompts the user
    * for input. It then returns an action to perform based on that
@@ -16,7 +16,9 @@ module type GUI = sig
    * to a menu named [title] and prompts the user to select an option.
    * It then returns the 'a part of the menu option that is selected,
    * or def if the user exits the menu *)
-  val menu       : string -> (string * 'a) list -> 'a -> 'a
+  val menu : string -> (string * 'a) list -> 'a -> 'a
 
+  (* [display_win p] displays to the user that player [p] won.
+   * for implementing this function [string_of_player] may be useful *)
   val display_win : player -> unit
 end
