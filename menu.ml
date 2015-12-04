@@ -11,10 +11,13 @@ type real_ai = | Real | AI
 let string_of_real_ai = function
   | Real -> "Player"
   | AI   -> "AI"
+
+(* data type for preferences for the game *)
 type config = { white : real_ai
               ; black : real_ai
               ; mode : string * (module Game_mode)
               }
+
 let real_ai_of_player_config p c =
   match p with
   | White -> c.white
@@ -23,8 +26,15 @@ let config_change_player p c n =
   match p with
   | White -> {c with white = n}
   | Black -> {c with black = n}
+let config_flip_player p c =
+  match realai_of_player_config p c with
+  | Real -> config_change_player p c AI
+  | AI   -> config_change_player p c Real
 
+(* first menu presented to user *)
 let initmenu () : config option =
+  (* m is which sub-menu we are in
+   * c is the current configuration state *)
   loop_while (fun (m,c) ->
       match m with
       | `Start ->
@@ -35,28 +45,26 @@ let initmenu () : config option =
           ]
           (Break(None))
       | `Config ->
-        let opt x = (string_of_player x ^ ": " ^ string_of_real_ai (real_ai_of_player_config x c)), Cont(`RealAI(x), c) in
+        (* clicking on an item flips the value Real <-> AI*)
+        let player_opt x =
+          (string_of_player p ^ ": " ^
+           string_of_real_ai (real_ai_of_player_config p c)),
+          Cont(`Config, config_flip_player p c) in
         menu "Configuration"
-          [ opt White
-          ; opt Black
+          [ player_opt White
+          ; player_opt Black
           ; ("GUI: " ^ fst (get_gui ())), Cont(`GUI, c)
           ; ("Game Mode: " ^ fst c.mode), Cont(`Mode, c)
           ; "Back", Cont(`Start, c)
           ]
           (Cont(`Start, c))
-      | `RealAI(p) ->
-        let opt x = string_of_real_ai x, Cont(`Config, config_change_player p c x) in
-        menu (string_of_player p ^ ": " ^ string_of_real_ai (real_ai_of_player_config p c))
-          [ opt Real
-          ; opt AI
-          ; "Back", Cont(`Config, c)
-          ]
-          (Cont(`Config, c))
       | `GUI ->
+        (* menu to select gui *)
         let gui =
           menu ("GUI: " ^ fst (get_gui ()))
             (List.map (fun (a,b) -> (a,(a,b))) gui_list)
             (get_gui ()) in
+        (* switches to that gui *)
         deinit ();
         set_gui gui;
         init ();

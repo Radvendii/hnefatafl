@@ -21,7 +21,7 @@ let board_gen (b:board) (a:action) : board =
   match a with
             | Move(c1, c2) ->
                   { b with
-                    turn = next_turn b.turn ;
+                    turn = other_player b.turn ;
                     pieces =
                       let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
                       let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
@@ -71,7 +71,7 @@ let () =
                     List.length rps) in
                 Cont
                     { b with
-                      turn = next_turn b.turn ;
+                      turn = other_player b.turn ;
                       pieces = pieces;
                       captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
                                   else (fst b.captured, n_taken + snd b.captured)
