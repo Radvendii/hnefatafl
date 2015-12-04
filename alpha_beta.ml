@@ -1,5 +1,4 @@
 open GUI
-open Main
 open Game_types
 open MODE_list
 
@@ -24,16 +23,19 @@ let white_util (b:board) : int =
                   else
                     if (Random.bool ()) then x_out else y_out
 
-(*
+
 (*Black Utility Extras*)
 let m_distance c1 c2 =
     ((abs(fst c1 - fst c2)) + (abs(snd c1 - snd c2)))
 
 let net_king_distance (b:board) : int =
-  let king_cords = find_wking b
-  let b_pieces = match
-  List.map m_distance b.pieces
-*)
+  let king_cords =
+    match find_wking b with
+      | None -> failwith "Derp"
+      | Some (x,y) -> (x,y) in
+    match (m_distance king_cords) b.pieces with
+      | [] -> 0
+      | hd :: tl -> hd +
 
 let black_util (b:board) : int =
   (*white_pieces_caputred - black_pieces_captured*)
@@ -42,7 +44,15 @@ let black_util (b:board) : int =
 let utility (b:board) =
   ((white_util b)/10) - black_util b
 
-let simple_move (b:board): action =
+let rec random_prune (i:float) (l) =
+  Random.self_init ();
+  match l with
+  | [] -> []
+  | hd :: tl -> if ((Random.float (1.0) < (i))) then hd :: (random_prune i tl)
+                                           else (random_prune i tl)
+
+let board (b:board): action =
+  Random.self_init ();
   let compare_moves (new_pair:(action*int)) (acc:(action*int)) =
         if ((fst new_pair) > (fst acc)) then (new_pair) else (acc) in
   let best_for_piece (p:(Game_types.piece)*(coord)): action*int =
@@ -52,10 +62,19 @@ let simple_move (b:board): action =
     let treated_list =
       (match b.turn with
         |White ->
-        List.map (fun act -> (act,(utility (board_gen b act)))) (action_space)
+        List.map (fun act -> (act,(utility (MODE_list.board_gen b act))))
+        (action_space)
         |Black ->
-        List.map (fun act -> (act,((-1)*utility (board_gen b act))))
+        List.map (fun act -> (act,((-1)*utility (MODE_list.board_gen b act))))
             (action_space)) in
     List.fold_left compare_moves (Nop,0) treated_list in
-  let treated_piece_list = List.map best_for_piece b.pieces in
+  let treated_piece_list = List.map best_for_piece ((random_prune (0.9) (b.pieces))) in
     fst (List.fold_left compare_moves (Nop,0) treated_piece_list)
+
+let random_move (b:board): action =
+  Random.self_init ();
+  let arbitrary_piece = List.nth (b.pieces) (Random.int (List.length b.pieces - 1)) in
+  let action_space =
+    List.map (fun valid_crd -> Move((snd arbitrary_piece),valid_crd))
+        (MODE_list.Mode.valid_moves (snd arbitrary_piece) b) in
+  List.nth action_space (Random.int (List.length action_space - 1))

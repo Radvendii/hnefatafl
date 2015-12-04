@@ -1,4 +1,6 @@
 open Game_mode
+open Game_types
+open Helpers
 
 module Dummy : Game_mode = struct
   let fail () = failwith("Must be dynamically replaced")
@@ -15,6 +17,28 @@ let nameref = ref("Dummy")
 let get_mode () = (!nameref, !modref)
 
 let modval () = !modref
+
+let board_gen (b:board) (a:action) : board =
+  let module Mod = (val modval (): Game_mode) in
+  let open Mod in
+  match a with
+            | Move(c1, c2) ->
+                  { b with
+                    turn = next_turn b.turn ;
+                    pieces =
+                      let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+                      let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+                      match p1 with
+                      | None -> failwith "checked for in valid_move"
+                      | Some(p1') ->
+                        (* move the piece!*)
+                        let nps = (fst p1', c2)::ps' in
+                        (* remove captured pieces *)
+                        let rps = piece_taken c2 {b with pieces = nps} in
+                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
+                  }
+            | Nop -> b
+            | _ -> failwith "Quitting is not an option, computer"
 
 let set_mode (modname, modval) =
   nameref := modname;

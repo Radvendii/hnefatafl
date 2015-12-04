@@ -16,6 +16,7 @@ let () = set_mode default_mode
     |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
     |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
 
+<<<<<<< HEAD
 
 let board_gen (b:board) (a:action) : board =
   match a with
@@ -38,6 +39,8 @@ let board_gen (b:board) (a:action) : board =
             | _ -> failwith "Quitting is not an option computer, You shouldnt
                               be generating it"
 
+=======
+>>>>>>> 55ba0061f03e136faf5f069c500cbf451cc7a580
 let () =
   (* initialize graphics library *)
   init () ;
@@ -45,14 +48,20 @@ let () =
   (* initial menu (configuration) for now, disregard configuration *)
       match initmenu () with
       | None -> Break(())
-      | Some({mode;_}) ->
+      | Some({mode;white;black}) ->
+        let real_ai_of_player = function
+          | White -> white
+          | Black -> black in
         set_mode mode;
         loop_while (fun b ->
             match player_won b with
             | Some(p) -> display_win p; Break(())
             | None ->
               (* prompt user for input *)
-              match board b with
+              match if ((real_ai_of_player b.turn) = Real)
+                then board b
+                else (Alpha_beta.board b)
+               with
               | Move(c1, c2) ->
                 if not @@ valid_move c1 c2 b then Cont(b)
                 else
