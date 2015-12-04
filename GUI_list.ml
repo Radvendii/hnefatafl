@@ -43,6 +43,7 @@ let default_gui = "3D", (module ThreeD.GUI : GUI)
 
 let gui_list =
   [ "ascii", (module Ascii.GUI : GUI)
+  ; "CLI", (module CLI.GUI : GUI)
   ; "2D", (module Graphical.GUI : GUI)
   ; "3D", (module ThreeD.GUI : GUI)
   ]
