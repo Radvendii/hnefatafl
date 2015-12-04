@@ -27,15 +27,19 @@ let white_util (b:board) : int =
 (*Black Utility Extras*)
 let m_distance c1 c2 =
     ((abs(fst c1 - fst c2)) + (abs(snd c1 - snd c2)))
-
+(*
 let net_king_distance (b:board) : int =
   let king_cords =
     match find_wking b with
       | None -> failwith "Derp"
       | Some (x,y) -> (x,y) in
-    match (m_distance king_cords) b.pieces with
-      | [] -> 0
-      | hd :: tl -> hd +
+    let helper l =
+      match ((m_distance king_cords) b.pieces) with
+        | [] -> 0
+        | hd :: tl -> hd + helper tl in
+  helper king_cords
+*)
+
 
 let black_util (b:board) : int =
   (*white_pieces_caputred - black_pieces_captured*)
