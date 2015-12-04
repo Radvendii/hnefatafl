@@ -114,7 +114,11 @@ module GUI : GUI = struct
     let calc_inv_y y = (y - start_draw_y ()) / side_len () in
 
     let draw_board b' =
+      (* draw board square *)
+      set_color 0x808080;
+      fill_rect (start_draw_x ()) (start_draw_y ()) (draw_len ()) (draw_len ());
       (* draw grid *)
+      set_color 0x909090;
       List.iter (fun (i,j) ->
           draw_rect
             (calc_x i)
@@ -122,6 +126,7 @@ module GUI : GUI = struct
             (side_len ())
             (side_len ())
         ) (prod (0 -- (w-1)) (0 -- (h-1)));
+      set_color black;
       (* draw pieces *)
       List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) (side_len ()) (side_len ())) b'.pieces;
       (* draw current turn *)
