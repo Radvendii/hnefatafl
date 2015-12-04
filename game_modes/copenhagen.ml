@@ -3,14 +3,13 @@ open Helpers
 open Game_types
 
 (*COPENHAGEN GAME MODE
- *fetlar game mode + encircling + shieldwall
+ *fetlar game mode + shieldwall
  *Shieldwall captures are done when a team brackets
  *in the other team with a row across the front and
  *two on the ends.  King can take part in capture.
  *still can use corner restricted squares
  *need 2+ talfmen in the opposing row
- *King can be in the group attacked, but king is not taken
- *the black team wins if they surround the king and all remaining defenders
+ *King can be in the group attacked
  *)
 
 module Mode : Game_mode = struct

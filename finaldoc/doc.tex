@@ -30,7 +30,7 @@ We created this version of the game after our inital study of the rules.  After 
 we realized that this game mode is not as accurate historically as Fetlar.  For this reason, we
 are leaving this mode of the game as the default (because it is the easiest to explain and understand)
 but naming it CS3110 Hnefatafl (because it does not perfectly match any true rule set).\\
-The game is played on an $7\times 7$ checkered board with two uneven sides.
+The game is played on an $9\times 9$ checkered board with two uneven sides.
 $8$ white pieces are positioned around a white ``king'' at the center of the
 board creating a cross, with $16$ black pieces arranged on the edges surrounding them.
 
@@ -77,9 +77,23 @@ Main mechanics of Fetlar:
   Capturing in Fetlar is very similar to capturing in our default game.  Capturing of pawns is done by actively flanking them (sandwiching the captured piece between two opponents).  Capturing of the king is done by actively flanking him by surrounding him on all four sides.  In this version, however, the king can participate in captures.  There are also the restricted squares.  This means that the 5 restricted squares can replace one of the attacking pieces in a flanking move.  Even with the restricted squares, black cannot capture the king when he is against a wall.  The throne square will always be hostile to black pieces and it will be hostile to white pieces when it is empty. This means that the king can be captured if he sits immediately next to the throne and is surrounded on the other 3 sides by black pieces.
 \item \textbf{Winning}\\
   The black team wins by capturing the king.  The white team wins by having the king escape.  He does this by landing on a corner square.
+\end{enumerate}
 
-\subsection{Copenhagan}
-This is a possibility if it gets finished.
+\subsection{Copenhagan Hnefatafl}
+This is a harder form of Hnefatafl, but it has similar features to Fetlar.  The thing that makes this game more difficult is additional ways that pieces can be captured.
+
+Main mechanics of Copenhagan:
+\begin{enumerate}
+\item \textbf{Restricted Squares}\\
+  This is the same idea as Fetlar.
+\item \textbf{Movement}\\
+  The same rules apply as in Fetlar.
+\item \textbf{Capturing}
+  The generics of capturing are the same as Fetlar. There is an additional way of capturing called a shieldwall.  This is accomplished by bracketing the opposing team against a wall.  For this move to be complete, the offensive team must be placed one in front of each defensive player, backing them into a wall.  The line of defensive pieces must also be pegged in on the bookends with an offensive piece. A corner square can also act as a bookend piece. You can capture as many pieces as you want by doing this move.  This includes capture of the king.
+\item \textbf{Winning}
+  Once again, the king must move to the corner squares to escape.  White wins when this occurs.  The black team wins when the king is captured.
+\end{enumerate}
+
 
 \section{Interface:}
 There are three possible GUIs that the user can decide between at runtime.  They include a text-based interface, a 2D interface, and a 3D interface.  They are described below.  Every GUI includes the command that q and esc are quit.  This means quitting up to a higher level menu. If you quit a game, there is no way to re-enter it.  It is important to use the q and esc keys when quitting a GUI because they are pre-programmed to exit gracefully.  Users that do not use these keys will see errors in their terminal.
