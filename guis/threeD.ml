@@ -38,6 +38,7 @@ module GUI : GUI = struct
       Sdl.init [`VIDEO];
       ignore (Sdlvideo.set_video_mode w h [`DOUBLEBUF; `OPENGL]);
       ignore @@
+      (* thread to handle events/input *)
       Thread.create
         (loop_while (fun () ->
              let open Sdlevent in
@@ -80,31 +81,35 @@ module GUI : GUI = struct
       GlLight.color_material `both `ambient_and_diffuse;
       GlMat.mode `projection;
       GlMat.load_identity ();
+      (* position camera *)
       GluMat.perspective ~fovy:60.0 ~aspect:1.33 ~z:(0.5,100.0);
       GluMat.look_at ~eye:(0., 1.5, -1.5) ~center:(0., 0., 0.) ~up:(0., -1., 0.)
-      (* GluMat.look_at ~eye:(0., 0.0, -1.5) ~center:(0., 0., 0.) ~up:(0., -1., 0.); *)
-      let clear_2D () =
-        GlClear.clear[`color; `depth];
-        Gl.disable `lighting;
-        Gl.disable `color_material;
-        GlMat.mode `projection;
-        GlMat.load_identity ();
-        ()
+
+    (* clear for menu
+     * didn't get it working though *)
+    (* let clear_2D () = *)
+    (*   GlClear.clear[`color; `depth]; *)
+    (*   Gl.disable `lighting; *)
+    (*   Gl.disable `color_material; *)
+    (*   GlMat.mode `projection; *)
+    (*   GlMat.load_identity (); *)
+    (*   () *)
   end
 
   open Sdl'
 
   let cursor = ref(0,0)
 
+  (* it's just a linear function mapping
+   * (0,w) -> (-1,1) and (0,h) -> (-1,1) *)
   let pos_of_coord (xc,yc) (w,h) =
-    (* it's just a linear function mapping
-     * (0,w) -> (-1,1) and (0,h) -> (-1,1) *)
     -1.0 +. foi (xc * 2) /. foi w,
     -1.0 +. foi (yc * 2) /. foi h
+
+  (* linear function mapping
+   * (-1,1) -> (0,w) and (0,h)
+   * combined with a flooring *)
   let coord_of_pos (xp,yp) (w,h) =
-    (* linear function mapping
-     * (-1,1) -> (0,w) and (0,h)
-     * combined with a flooring *)
     int_of_float ((xp+.1.0) /. 2.0 *. foi w),
     int_of_float ((yp+.1.0) /. 2.0 *. foi h)
 
@@ -118,6 +123,7 @@ module GUI : GUI = struct
   let deinit =
     deinit
 
+  (* colors *)
   let white_color = (0.4, 0.4, 0.4)
   let black_color = (0.08, 0.08, 0.08)
   let white_selected_color = (0.6, 0.6, 0.6)
@@ -152,8 +158,10 @@ module GUI : GUI = struct
     let b = s.board in
     let (w,h) = b.dims in
     let size = max w h in
+    (* draw 2D squares slightly above the board and pointing up *)
     let draw_v2s v2s =
-      GlDraw.begins `quads; List.iter (fun (x,y) -> normal_vertex3 ((0.,0.,-1.0), (x,y,-.0.001))) v2s;
+      GlDraw.begins `quads;
+      List.iter (fun (x,y) -> normal_vertex3 ((0.,0.,-1.0), (x,y,-.0.001))) v2s;
       GlDraw.ends () in
     (* draw illuminating square for cursor *)
     let draw_cursor () =
@@ -186,6 +194,11 @@ module GUI : GUI = struct
 
     transform_to_square !cursor;
     draw_cursor ();
+
+    (* draw light at selected piece
+     * this must be done *before* any
+     * pieces are drawn so that it will actually light them up
+     * (stupid imperative state) *)
     (match s.selected with
      | Some(i,j) ->
        transform_to_square (i,j);
@@ -202,14 +215,14 @@ module GUI : GUI = struct
     GlMat.mode `modelview;
     GlMat.load_identity ();
     GlDraw.begins `quads;
-    (* GlDraw.color (0.511, 0.328, 0.08); *)
+    (* GlDraw.color (0.511, 0.328, 0.08); *) (* alternative brown color *)
     GlDraw.color (0.5, 0.5, 0.5);
     List.iter normal_vertex3 Game_board.Data.vertex_list;
     GlDraw.ends ();
 
     (* draw grid on board *)
     GlDraw.color (0.6, 0.6, 0.6);
-    (* GlDraw.color (0.611, 0.418, 0.15); *)
+    (* GlDraw.color (0.611, 0.418, 0.15); *) (* alternative brown color *)
     let strip_width = 0.005 in
 
     List.iter (fun (i,j) ->
@@ -235,6 +248,10 @@ module GUI : GUI = struct
     (* draw pieces *)
     List.iter (fun (p, (i,j)) ->
         transform_to_square (i,j);
+        (* selected piece is glowing
+         * also a slightly different color
+         * because glowing black pieces look
+         * AWFUL *)
         (if s.selected = Some(i,j)
          then
            (GlLight.material `both (`emission (0.0,0.0,0.2,1.0));
@@ -246,6 +263,7 @@ module GUI : GUI = struct
     Gl.flush ();
     Sdlgl.swap_buffers ()
 
+  (* type for actions taken within the GUI *)
   type guiaction =
     | GUIMoveC  of coord
     | GUISelect of coord
@@ -253,6 +271,7 @@ module GUI : GUI = struct
     | GUIQuit
     | GUINop
 
+  (* process input *)
   let guiaction_of_key k s =
     let (w,h) = s.board.dims in
     let (cx,cy) = !cursor in
@@ -279,6 +298,8 @@ module GUI : GUI = struct
       else GUINop
     | Sdlkey.KEY_q
     | Sdlkey.KEY_ESCAPE -> GUIQuit
+      (* space selects or moves the piece,
+       * depending on if there is already a selected piece *)
     | Sdlkey.KEY_SPACE ->
       (match s.selected with
        | None -> GUISelect(cx,cy)
@@ -307,14 +328,17 @@ module GUI : GUI = struct
         | Some(k) -> process_guiaction (guiaction_of_key k s) s
       ) {selected = None; board=b}
 
-  (* displaying text is hard; I'm just going to let Graphical.GUI do it.*)
-    let menu title options default =
-      deinit ();
-      Graphical.GUI.init ();
-      let r = Graphical.GUI.menu title options default in
-      Graphical.GUI.deinit ();
-      init ();
-      r
+  (* displaying text in OpenGL is hard;
+   * I'm just going to let Graphical.GUI do it.
+   * TODO: Make this not flicker back to this GUI
+   * whenever the menu is changed *)
+  let menu title options default =
+    deinit ();
+    Graphical.GUI.init ();
+    let r = Graphical.GUI.menu title options default in
+    Graphical.GUI.deinit ();
+    init ();
+    r
 
   let display_win p = menu (string_of_player p ^ " wins!") ["play again", ()] ()
 end

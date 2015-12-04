@@ -3,9 +3,10 @@ open Game_types
 open GUI
 
 module GUI : GUI = struct
-  module Termbox' = struct (* extends termbox to keep track of screen, cursor*)
-    (* HERE BE DRAGONS *)
+    (* extends termbox to keep track of screen, cursor*)
+  module Termbox' = struct
     include Termbox
+    (* we shouldn't have boards bigger than 400x400 accross *)
     let screen_w = 400
     let screen_h = 400
     let out_of_bounds (x,y) =
@@ -16,10 +17,14 @@ module GUI : GUI = struct
          y < screen_h)
     let screen = Array.make_matrix screen_w screen_h None
     let cursor = ref((1,1))
+
+    (* records cursor position *)
     let set_cursor x y =
       cursor := (x,y) ;
       Termbox.set_cursor x y
     let get_cursor () = !cursor
+
+    (* records screen cells position*)
     let set_cell_char ?fg:(fg=Default) ?bg:(bg=Default) x y c =
       if out_of_bounds (x,y)
       then failwith "out of bounds" (* TODO: This is kludgy *)
@@ -27,6 +32,20 @@ module GUI : GUI = struct
            ; screen.(x).(y) <- Some c
            )
     let get_cell_char x y = screen.(x).(y)
+
+    (* convenience function to print whole strings *)
+    let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
+      let rec char_list_helper x' y' cs =
+        match cs with
+        | [] -> ()
+        | c::cs' ->
+          match c with
+          | '\n' -> char_list_helper x (y'+1) cs'
+          | c    ->
+            set_cell_char ~fg:fg ~bg:bg x' y' c ;
+            char_list_helper (x'+1) y' cs' in
+      char_list_helper x y (char_list_of_string s)
+
 
     let clear () =
       Termbox.clear ();
@@ -39,6 +58,7 @@ module GUI : GUI = struct
 
   open Termbox'
 
+  (* actions taken within the GUI *)
   type guiaction =
     | GUIMoveC  of coord
     | GUISelect of coord
@@ -46,6 +66,8 @@ module GUI : GUI = struct
     | GUIQuit
     | GUINop
 
+  (* this is a record because we might want
+   * to add fields at a later point *)
   type guistate = {selected : coord option}
 
   let char_of_piece = function
@@ -53,9 +75,10 @@ module GUI : GUI = struct
     | WPawn -> 'O'
     | WKing -> '@'
 
-  let init () = let _ = init () in ()
+  let init () = ignore(init ())
   let deinit = shutdown
 
+  (* what to do on an input event *)
   let guiaction_of_event e s =
     let (cx,cy) = get_cursor () in
     match e with
@@ -74,30 +97,22 @@ module GUI : GUI = struct
        | 'k' -> GUIMoveC(cx,   cy-1)
        | 'l' -> GUIMoveC(cx+1, cy)
        | 'q' | '\x1B' -> GUIQuit
+         (* space bar either selects or moves,
+          * depending on if there is already a selected piece *)
        | ' ' ->
          (match s.selected with
           | None -> GUISelect(cx,cy)
           | Some(sx, sy) -> GUIMove((sx,sy),(cx,cy)))
        | _   -> GUINop)
 
-  let set_cell_str ?fg:(fg=Default) ?bg:(bg=Default) x y s =
-    let rec char_list_helper x' y' cs =
-      match cs with
-      | [] -> ()
-      | c::cs' ->
-        match c with
-        | '\n' -> char_list_helper x (y'+1) cs'
-        | c    ->
-          set_cell_char ~fg:fg ~bg:bg x' y' c ;
-          char_list_helper (x'+1) y' cs' in
-    char_list_helper x y (char_list_of_string s)
-
   let draw_board b =
-    (* draw the cursor *)
+    clear ();
+
+    (* make sure the cursor is drawn *)
     let (x,y) = (get_cursor ()) in
     set_cursor x y;
+
     (* draw the border *)
-    clear () ;
     List.iter
       (fun x ->
          set_cell_char x 0 '-';
@@ -108,22 +123,76 @@ module GUI : GUI = struct
          set_cell_char 0 y '|';
          set_cell_char (fst b.dims + 1) y '|')
       (0--(snd b.dims + 1)) ;
+
     (* draw the pieces *)
     List.iter
       (fun (p,c) ->
-         set_cell_char (fst c + 1) (snd c + 1) (char_of_piece p)) (* shift by one to avoid border *)
+         (* shift by one (+1) to avoid border *)
+         set_cell_char (fst c + 1) (snd c + 1) (char_of_piece p))
       b.pieces ;
+
     (* print who's turn it is *)
     set_cell_str 0 (snd b.dims + 3) ("It is " ^ string_of_player b.turn ^ "'s turn");
     present ()
 
 
+  (* colors *)
+  let title_color = Green
+  let selected_color = Red
+  (* for selected tile of the board *)
+  let board_selected_color = Blue
+  let item_color = Default
+
+  (* resets the color of the given tile *)
+  let reset_color i j =
+    set_cell_char ~bg:Default i j
+      (* reset the color of the selectd tile *)
+      (match get_cell_char i j with
+       | None -> ' '
+       | Some c -> c)
+
+  (* user input for when there is a board displayed
+   * i.e. what to do with a guiaction *)
+  let user_input () =
+    loop_while (fun s ->
+        match guiaction_of_event (poll_event ()) s with
+        | GUIMoveC(x,y) ->
+          (* don't allow movement onto the border *)
+          if List.mem (get_cell_char x y) [Some('|'); Some('-')] then Cont(s)
+          else (set_cursor x y
+               ; present ()
+               ; Cont(s))
+        | GUISelect(x,y) ->
+          (match get_cell_char x y with
+           | None -> Cont(s)
+           | Some c ->
+             set_cell_char ~bg:board_selected_color x y c
+           ; present ()
+           ; Cont({selected = Some(x,y)}))
+        | GUIMove((x1,y1),(x2,y2)) ->
+          ( reset_color x1 y1
+          ; Break(Move((x1-1,y1-1),(x2-1,y2-1))))
+        | GUINop -> Cont(s)
+        | GUIQuit ->
+          match s.selected with
+          | None -> Break(Quit)
+          | Some(x,y) ->
+            ( reset_color x y
+            ; present ()
+            ; Cont({selected = None}))
+      )
+      {selected = None}
+
+  let board b =
+    draw_board b;
+    user_input ()
+
   let draw_menu title strs (sel : int) =
     hide_cursor ();
     clear ();
-    set_cell_str ~fg:Green 0 0 title ;
+    set_cell_str ~fg:title_color 0 0 title ;
     List.iteri (fun i ->
-        let fg = if i = sel then Red else Default in
+        let fg = if i = sel then selected_color else item_color in
         set_cell_str ~fg:fg 2 ((i+1)*2)) strs;
     present ()
 
@@ -144,6 +213,7 @@ module GUI : GUI = struct
        | ' ' -> `MenuSelect
        | _   -> `MenuNop)
 
+  (* bounding functions clip the value into the range *)
   let bound_below n b =
     if n < b then b else n
   let bound_above n b =
@@ -159,47 +229,6 @@ module GUI : GUI = struct
         | `MenuUp -> Cont(bound_below (s-1) 0)
         | `MenuSelect -> Break(snd @@ List.nth options s)
         | `MenuQuit -> Break(default)) 0
-
-
-  let user_input () =
-    loop_while (fun s ->
-        match guiaction_of_event (poll_event ()) s with
-        | GUIMoveC(x, y) ->
-          if not @@ List.mem (get_cell_char x y) [Some('|'); Some('-')] (* don't allow movement onto the border *)
-          then (set_cursor x y
-               ; present ()
-               ; Cont(s))
-          else Cont(s)
-        | GUISelect(x, y) ->
-          (match get_cell_char x y with
-           | None -> Cont(s)
-           | Some c ->
-             set_cell_char ~bg:Blue x y c
-           ; present ()
-           ; Cont({selected = Some (x,y)}))
-        | GUIMove((x1,y1),(x2,y2)) ->
-          set_cell_char ~bg:Default x1 y1
-            (match get_cell_char x1 y1 with
-             | None -> ' '
-             | Some c -> c) (* reset the color *)
-        ; Break(Move((x1-1,y1-1),(x2-1,y2-1)))
-        | GUINop -> Cont(s)
-        | GUIQuit ->
-          match s.selected with
-          | None -> Break(Quit)
-          | Some(x,y) ->
-            (set_cell_char ~bg:Default x y
-               (match get_cell_char x y with
-                | None -> ' '
-                | Some c -> c) (* reset the color *)
-            ; present ()
-            ; Cont({selected = None}))
-      )
-      {selected = None}
-
-  let board b =
-    draw_board b;
-    user_input ()
 
   let display_win p =
     menu (string_of_player p ^ " won!") ["back", ()] ()
