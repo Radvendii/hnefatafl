@@ -37,6 +37,18 @@ let rec char_list_of_string str =
 let rec string_of_char_list xs =
   List.fold_left (^) "" (List.map Char.escaped xs)
 
+let rec split_words s =
+  List.fold_right
+    (fun c acc ->
+       if c = ' '
+       then ""::acc
+       else
+         let s = Char.escaped c in
+         (match acc with
+          | [] -> [s]
+          | w::ws -> (w^s)::ws)
+    ) (char_list_of_string s) []
+
 
 type direction = Up | Down | Left | Right
 let step_dir dir (x,y) =
