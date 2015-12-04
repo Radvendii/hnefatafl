@@ -58,9 +58,10 @@ let board_gen (b:board) (a:action) : board option =
   let open Mod in
   match a with
   | Move(c1, c2) ->
-    if not @@ valid_move c1 c2 b then Some(b)
-    else
-      let (pieces, p, n_taken) =
+    (
+      (* ignore invalid moves *)
+      if not @@ valid_move c1 c2 b then Some(b)
+      else
         let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
         let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
         match p1 with
@@ -68,17 +69,21 @@ let board_gen (b:board) (a:action) : board option =
         | Some(p1') ->
           (* move the piece!*)
           let nps = (fst p1', c2)::ps' in
-          (* remove captured pieces *)
+          (* captured pieces *)
           let rps = piece_taken c2 {b with pieces = nps} in
-          (List.filter (fun x -> not @@ List.mem (snd x) rps) nps,
-           player_of_piece(fst p1'),
-           List.length rps) in
-      Some { b with
-             turn = other_player b.turn ;
-             pieces = pieces;
-             captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
-               else (fst b.captured, n_taken + snd b.captured)
-           }
+          (* remove captured pieces from (pieces with original piece moved) *)
+          let pieces =
+            List.filter (fun x -> not @@ List.mem (snd x) rps) nps in
+          let n_taken = List.length rps in
+          Some { b with
+                 turn = other_player b.turn ;
+                 pieces = pieces;
+                 captured =
+                   match player_of_piece(fst p1') with
+                   | Black -> n_taken + fst b.captured, snd b.captured
+                   | White -> fst b.captured, n_taken + snd b.captured
+               }
+    )
   | Nop -> Some(b)
   | Quit -> None
 

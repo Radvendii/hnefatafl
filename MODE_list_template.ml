@@ -40,6 +40,15 @@ module Mode : Game_mode = struct
     Mod.player_won b
 end
 
+  let valid_move c1 c2 b =
+    let module Mod = (val modval (): Game_mode) in
+    let open Mod in
+    List.mem c2 (valid_moves c1 b) &&
+    match piece_at c1 b with
+    | None -> false
+    | Some BPawn -> b.turn = Black
+    | _ -> b.turn = White
+
 (* calculate the next board state given an attempted move
  * integrating all of the Game_mode functions
  * of the currently loaded Game_mode module
@@ -48,20 +57,32 @@ let board_gen (b:board) (a:action) : board option =
   let module Mod = (val modval (): Game_mode) in
   let open Mod in
   match a with
-            | Move(c1, c2) ->
-                  { b with
-                    turn = next_turn b.turn ;
-                    pieces =
-                      let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-                      let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-                      match p1 with
-                      | None -> failwith "checked for in valid_move"
-                      | Some(p1') ->
-                        (* move the piece!*)
-                        let nps = (fst p1', c2)::ps' in
-                        (* remove captured pieces *)
-                        let rps = piece_taken c2 {b with pieces = nps} in
-                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
-                  }
-            | Nop -> b
-            | Quit -> None
+  | Move(c1, c2) ->
+    (
+      (* ignore invalid moves *)
+      if not @@ valid_move c1 c2 b then Some(b)
+      else
+        let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+        let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+        match p1 with
+        | None -> failwith "checked for in valid_move"
+        | Some(p1') ->
+          (* move the piece!*)
+          let nps = (fst p1', c2)::ps' in
+          (* captured pieces *)
+          let rps = piece_taken c2 {b with pieces = nps} in
+          (* remove captured pieces from (pieces with original piece moved) *)
+          let pieces =
+            List.filter (fun x -> not @@ List.mem (snd x) rps) nps in
+          let n_taken = List.length rps in
+          Some { b with
+                 turn = other_player b.turn ;
+                 pieces = pieces;
+                 captured =
+                   match player_of_piece(fst p1') with
+                   | Black -> n_taken + fst b.captured, snd b.captured
+                   | White -> fst b.captured, n_taken + snd b.captured
+               }
+    )
+  | Nop -> Some(b)
+  | Quit -> None
