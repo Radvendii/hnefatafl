@@ -79,7 +79,7 @@ module Mode : Game_mode = struct
                         else if a = None && (c = Some WPawn || c = Some WKing)
                           then (step_dir dir (x,y) = (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (0,snd b.dims-1), [(x,y)])
                         else (false, [])
-    |(Some WPawn,0,_) |(Some WKing,0,_) -> let a = piece_at (step_dir dir (x,y)) b in
+    |(Some WPawn,0,_) -> let a = piece_at (step_dir dir (x,y)) b in
                           let c = piece_at (x+1,y) b in
                           if c = Some BPawn && (a = Some WPawn || a = Some WKing)
                           then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
@@ -89,7 +89,17 @@ module Mode : Game_mode = struct
                         else if a = None && c = Some BPawn
                           then (step_dir dir (x,y) = (0, snd b.dims-1) || step_dir dir (x,y) = (0,0), [(x,y)])
                         else (false, [])
-    |(Some WPawn,j,_) |(Some WKing,j,_) when j = fst b.dims -1->
+    |(Some WKing,0,_) -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x+1,y) b in
+                          if c = Some BPawn && (a = Some WPawn )
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y) = (0, snd b.dims-1) || step_dir dir (x,y) = (0,0), [])
+                        else (false, [])
+    |(Some WPawn,j,_) when j = fst b.dims -1->
                           let a = piece_at (step_dir dir (x,y)) b in
                           let c = piece_at (x-1,y) b in
                           if c = Some BPawn && (a = Some WPawn || a = Some WKing)
@@ -100,7 +110,17 @@ module Mode : Game_mode = struct
                         else if a = None && c = Some BPawn
                           then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (fst b.dims-1,0), [(x,y)])
                         else (false, [])
-    |(Some WPawn,_,0) |(Some WKing,_,0) ->let a = piece_at (step_dir dir (x,y)) b in
+    |(Some WKing,j,_) when j = fst b.dims -1 -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x-1,y) b in
+                          if c = Some BPawn && (a = Some WPawn)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (fst b.dims-1,0), [])
+                        else (false, [])
+    |(Some WPawn,_,0) ->let a = piece_at (step_dir dir (x,y)) b in
                           let c = piece_at (x,y+1) b in
                           if c = Some BPawn && (a = Some WPawn || a = Some WKing)
                           then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
@@ -110,7 +130,17 @@ module Mode : Game_mode = struct
                         else if a = None && c = Some BPawn
                           then (step_dir dir (x,y)= (fst b.dims-1,0) || step_dir dir (x,y)= (0,0), [(x,y)])
                         else (false, [])
-    |(Some WPawn,_,j) |(Some WKing,_,j) when j = snd b.dims -1 ->
+    |(Some WKing,_,0) -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y+1) b in
+                          if c = Some BPawn && (a = Some WPawn)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1,0) || step_dir dir (x,y)= (0,0), [])
+                        else (false, [])
+    |(Some WPawn,_,j) when j = snd b.dims -1 ->
                         let a = piece_at (step_dir dir (x,y)) b in
                           let c = piece_at (x,y-1) b in
                           if c = Some BPawn && (a = Some WPawn || a = Some WKing)
@@ -120,6 +150,16 @@ module Mode : Game_mode = struct
                           then (true, [(x,y)])
                         else if a = None && c = Some BPawn
                           then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (0,snd b.dims-1), [(x,y)])
+                        else (false, [])
+    |(Some WKing,_,j) when j = snd b.dims -1 -> let a = piece_at (step_dir dir (x,y)) b in
+                          let c = piece_at (x,y-1) b in
+                          if c = Some BPawn && (a = Some WPawn)
+                          then let d = am_i_in_shieldwall dir (step_dir dir (x,y)) b in
+                          (fst d, (snd d))
+                        else if c = Some BPawn && a = Some BPawn
+                          then (true, [])
+                        else if a = None && c = Some BPawn
+                          then (step_dir dir (x,y)= (fst b.dims-1, snd b.dims-1) || step_dir dir (x,y)= (0,snd b.dims-1), [])
                         else (false, [])
     |_ -> (false,[])
 
@@ -137,9 +177,8 @@ module Mode : Game_mode = struct
     |(Down, j, _) when j = fst b.dims -1->
                               let s = am_i_in_shieldwall dir (fst b.dims-1, y-1) b in
                                 if fst s then snd s else []
-    |(Down, _, j) when j = snd b.dims -2 ->
-                              let s = am_i_in_shieldwall Left (x, y-1) b in
-                                let t = am_i_in_shieldwall Right (x,y-1) b in
+    |(Down, _, 1) -> let s = am_i_in_shieldwall Left (x, 0) b in
+                                let t = am_i_in_shieldwall Right (x,0) b in
                                 if fst s && fst t then snd s @ snd t else []
     |(Left, 1, _)-> let s = am_i_in_shieldwall Up (0, y) b in
                                 let t = am_i_in_shieldwall Down (0,y) b in
@@ -219,10 +258,10 @@ module Mode : Game_mode = struct
                 c' = (fst b.dims -1, snd b.dims -1) ||
                 c' = (fst b.dims/2, snd b.dims/2)
                 then [step_dir dir c]
-                else check_shieldwall dir (step_dir dir c) b
+                else check_shieldwall dir c b
       |Some BPawn -> [step_dir dir c]
-      |Some WPawn -> check_shieldwall dir (step_dir dir c) b
-      |Some WKing -> []
+      |Some WPawn -> check_shieldwall dir c b
+      |Some WKing -> check_shieldwall dir c b
       end
     |Some WKing -> begin
       let i = check_center b c in
@@ -240,7 +279,7 @@ module Mode : Game_mode = struct
       |(Right,(Some BPawn, Some BPawn, None))   -> if i=2 then [step_dir dir c] else []
       |(Right,(Some BPawn, None, Some BPawn))   -> if i=3 then [step_dir dir c] else []
       |(Right,(None, Some BPawn, Some BPawn))   -> if i=6 then [step_dir dir c] else []
-      |_ -> []
+      |_ -> check_shieldwall dir c b
       end
 
   let piece_taken ((x,y):coord) (b:board) : coord list =
