@@ -39,4 +39,4 @@ module GUI : GUI = struct
     Mod.display_win p
 end
 
-let default_gui = "graphical", (module Graphical.GUI : GUI)
+let default_gui = "3D", (module ThreeD.GUI : GUI)

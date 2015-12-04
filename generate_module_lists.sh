@@ -3,12 +3,20 @@ gui_entry(){
     local f=$1
     local n=${f%.ml}
     local m=${n^}
+    local sl=$(sed -n '2p' guis/$f)
+    if [ "${sl:0:9}" = "   NAME: " ]
+    then n=${sl:9}
+    fi
     echo "\"$n\", (module $m.GUI : GUI)"
 }
 mode_entry(){
     local f=$1
     local n=${f%.ml}
     local m=${n^}
+    local sl=$(sed -n '2p' game_modes/$f)
+    if [ "${sl:0:9}" = "   NAME: " ]
+    then n=${sl:9}
+    fi
     echo "\"$n\", (module $m.Mode : Game_mode)"
 }
 

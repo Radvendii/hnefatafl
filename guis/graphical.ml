@@ -1,3 +1,6 @@
+(*
+   NAME: 2D
+*)
 open Helpers
 open Game_types
 open GUI
