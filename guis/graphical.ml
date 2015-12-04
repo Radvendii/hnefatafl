@@ -8,6 +8,7 @@ open GUI
 module GUI : GUI = struct
   module Graphics' = struct
     include Graphics
+    let initialized = ref(false)
     let key_was_down = ref None
     let button_was_down = ref None
     let key_pressed () =
@@ -17,6 +18,7 @@ module GUI : GUI = struct
       let r = !button_was_down in
       button_was_down := None; r
     let init () =
+      initialized := true;
       ignore @@
       Thread.create
         (loop_while (fun () ->
@@ -30,6 +32,13 @@ module GUI : GUI = struct
              with
              | _ -> Break(())
            )) ()
+    let deinit () =
+      if !initialized
+      then
+        (close_graph ();
+        initialized := false)
+      else ()
+
   end
   open Graphics'
   let init () =
@@ -40,7 +49,7 @@ module GUI : GUI = struct
     auto_synchronize false;
     init ()
 
-  let deinit () = close_graph ()
+  let deinit () = deinit ()
 
   (* points for the polygons to display pieces *)
   (* represent as fractions of a square *)
