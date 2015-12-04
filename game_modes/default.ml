@@ -1,3 +1,6 @@
+(*
+   NAME: CS3110
+*)
 open Helpers
 open Game_types
 open Game_mode

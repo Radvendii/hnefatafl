@@ -21,7 +21,7 @@ The modes differ in their rule sets and initial configurations.
 They are each described in detail below. To increase the complexity of the game, we implemented
 TWO/THREE different game modes.  We allow the player
 to decide, at runtime, what version on the game they would like to play.  The rules
-and intial setup of the game are then loaded into the main backend program and the player
+and intial setup of the game are then loaded into the main program and the player
 can begin.
 
 \section{Hnefatafl Game Mode Descriptions}
@@ -32,13 +32,10 @@ are leaving this mode of the game as the default (because it is the easiest to e
 but naming it CS3110 Hnefatafl (because it does not perfectly match any true rule set).\\
 The game is played on an $7\times 7$ checkered board with two uneven sides.
 $8$ white pieces are positioned around a white ``king'' at the center of the
-board, with $24$ black pieces arranged on the edges surrounding them.
-See~\ref{fig:initial_position}.
-\begin{figure}\label{fig:initial_position}
-  \centering
-  \scalebox{.5}{\includegraphics{hnefatafl}}
-  \caption{Hnefatafl starting board position. Source: \url{https://medium.com/war-is-boring/you-have-to-play-this-1-600-year-old-viking-war-game-cef088ae4e2d\#.10kof827g}}
-\end{figure}
+board creating a cross, with $16$ black pieces arranged on the edges surrounding them.
+
+The black team moves first.
+
 There are three main mechanics involved in the game:
 \begin{enumerate}
 \item \textbf{Movement}\\
@@ -52,18 +49,54 @@ There are three main mechanics involved in the game:
   The king cannot participate in flanking an opponent. In the case of the king,
   it must be flanked on all sides to be considered ``captured.''
 \item \textbf{Winning}\\
-  Black wins when the king is captured, or the king's only escape is to move
-  back to the center square of the board.\\
+  Black wins when the king is captured.\\
   White wins when the king is moved to one of the side squares of the board.
 \end{enumerate}
 See: \url{https://en.wikipedia.org/wiki/Tafl\_games\#Hnefatafl}
+
+\subsection{Fetlar Hnefatafl}
+This is a true version of the game.  The setup is an $11\times11$ checkered board with $12$ white
+pieces positioned around the white ``king'' at the center and $24$ black pieces around the edges of the board. The black team moves first.
+
+See~\ref{fig:initial_position}.
+\begin{figure}\label{fig:initial_position}
+  \centering
+  \scalebox{.5}{\includegraphics{hnefatafl}}
+  \caption{Hnefatafl starting board position. Source: \url{https://medium.com/war-is-boring/you-have-to-play-this-1-600-year-old-viking-war-game-cef088ae4e2d\#.10kof827g}}
+\end{figure}
+
+Main mechanics of Fetlar:
+\begin{enumerate}
+\item \textbf{Restricted Squares}\\
+  In this version of the game, there are restricted squares.  These are the throne (center square of the board) and the four corner squares.  These squares limit the movement of pawns and can be involved in captures.
+\item \textbf{Movement}\\
+  Pieces move like rooks in chess (horizontally or vertically).
+  There is no limit on the number of pieces that the king can move.
+  Pawns cannot land on a restricted square.  They can, however, pass through the throne if it is unoccupied by the white king.
+\item \textbf{Capturing}\\
+  Capturing in Fetlar is very similar to capturing in our default game.  Capturing of pawns is done by actively flanking them (sandwiching the captured piece between two opponents).  Capturing of the king is done by actively flanking him by surrounding him on all four sides.  In this version, however, the king can participate in captures.  There are also the restricted squares.  This means that the 5 restricted squares can replace one of the attacking pieces in a flanking move.  Even with the restricted squares, black cannot capture the king when he is against a wall.  The throne square will always be hostile to black pieces and it will be hostile to white pieces when it is empty. This means that the king can be captured if he sits immediately next to the throne and is surrounded on the other 3 sides by black pieces.
+\item \textbf{Winning}\\
+  The black team wins by capturing the king.  The white team wins by having the king escape.  He does this by landing on a corner square.
+
+\subsection{Copenhagan}
+This is a possibility if it gets finished.
+
 \section{Interface:}
-Ultimately we would like to implement the interface as a GUI using openGL, and
-allow click-and-drag motion commands. Initially, we will implement a text-based
-interface that uses chess-like notation for movement and output a ASCII grid to
-show positions of pieces. This interface will likely remain available as an
-option\\
-This will be playable against another human player, or against an AI.
+There are three possible GUIs that the user can decide between at runtime.  They include a text-based interface, a 2D interface, and a 3D interface.  They are described below.  Every GUI includes the command that q and esc are quit.  This means quitting up to a higher level menu. If you quit a game, there is no way to re-enter it.  It is important to use the q and esc keys when quitting a GUI because they are pre-programmed to exit gracefully.  Users that do not use these keys will see errors in their terminal.
+
+\subsection{Text-Based}
+We call this GUI "ascii".  It is in the file named "ascii.ml".  The controls for this GUI are the arrow buttons (or hjkl) to move.  The space bar selects a piece.  The location of the cursor is shown with a blue, highlighted square.  This GUI is implemented using Termbox which takes over the terminal that called the function.
+
+\subsection{2-Dimensional}
+We call this GUI "2D".  It is in the file named "graphical.ml".  The controls for this GUI are clicking and dragging with the mouse.  A selected piece moves with the mouse.  This GUI is implemented using the built-in OCaml graphics library.  It opens a new window.
+
+\subsection{3-Dimensional}
+We call this GUI "3D". It is in the file named "threeD.ml".  The controls for this GUI are arrow keys (and hjkl).  The cursor is shown with a lit tile.  Selection of a piece is done with the space bar.  This GUI is implemented using OpenGL and it opens a new window.
+
+\section{Artificial Intelligence}
+The AI computes, with no data structure, the optimal move at each turn.  The optimal move is computed using a utility function.  The utility function is dependent on the number of captured pieces and the distance of the white king to the win condition.  White and black actually use the same utility function.  This helps the black team not only capture pieces, but oppose the movement of the white king.  Relating the number of pieces captured to the movement of the king was one design consideration.  If you value the kings movement too highly, the white team AI will rush to the win condition with little consideration for the welfare of its pieces.  If you value the movement too little, the white AI turtles and only defends that king without actively trying to win.  We determined the valuation ratio between a lost piece and movement of the king by having AI with randomly generated constants play against each other and take the best value.  This is an informal version of a neural-network.
+
+\section{Menus}
 
 \section{Architecture}
 \begin{figure}[H]\label{fig:CCD}
@@ -98,8 +131,8 @@ knowledge of the screen state, and what the backend tells it to print. It
 does not report every keystroke, mouseclick, etc. the user makes, only what move
 the user would like to make.
 
-\subsection{Backend}
-Backend is in charge of the following tasks:
+\subsection{Main}
+Main is in charge of the following tasks:
 \begin{itemize}
 \item Initialization of menu and storage of configuration options
 \item Keeps track of the baord and player state
@@ -199,15 +232,36 @@ data.
 \item Get play testers
 \end{itemize}
 
-\section{Stretch Goals:}
+\section{Division of Labor}
 \begin{itemize}
-\item Hnefatafl is an old game, and there are many versions of it that exist.
-  Time permitting, we would like to implement many of these variants, working
-  off of a general game core.
-\item Detect if the game has become unwinnable.
-\item Collecting statistics on the game (who won, how many turns it took, etc)
-\item Storing the state of the game at every turn, and enabling turn by turn
-  playback
+\item Joseph
+\item Taeer
+  \begin{itemize}
+  \item Fetlar.ml
+    \begin{itemize}
+    \item Initial board setup
+    \end{itemize}
+  \end{itemize}
+\item Elizabeth
+  \begin{itemize}
+  \item Prepared final Design Document
+  \item Default.ml
+    \begin{itemize}
+    \item Winning conditions
+    \item Capturing pieces
+    \item Initial board setup
+    \end{itemize}
+  \item Fetlar.ml
+    \begin{itemize}
+    \item Winning conditions
+    \item Capturing pieces
+    \end{itemize}
+  \item Copenhagan.ml
+    \begin{itemize}
+    \item Winning conditions
+    \item Capturing pieces
+    \end{itemize}
+  \end{itemize}
 \end{itemize}
 
 \end{document}
