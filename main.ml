@@ -8,10 +8,11 @@ open MODE_list
 open Menu
 
   let valid_move c1 c2 b =
+    List.mem c2 (valid_moves c1 b) &&
     match piece_at c1 b with
-    |None -> false
-    |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
-    |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
+    | None -> false
+    | Some BPawn -> b.turn = Black
+    | _ -> b.turn = White
 
 let () =
   (* initialize graphics library *)
