@@ -72,7 +72,6 @@ module GUI : GUI = struct
       Gl.enable `light0; (* lighting *)
       Gl.enable `light1; (* lighting *)
       Gl.enable `light2; (* under cursor *)
-      Gl.enable `light3; (* inside selected object *)
       GlLight.light ~num:0 (`diffuse (0.2,0.2,0.2,1.0));
       GlLight.light ~num:0 (`position(3.0, -3.0, -6.0, 1.0));
       GlLight.light ~num:1 (`diffuse (0.2,0.2,0.2,1.0));
