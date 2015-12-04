@@ -15,7 +15,7 @@ let string_of_real_ai = function
 (* data type for preferences for the game *)
 type config = { white : real_ai
               ; black : real_ai
-              ; mode : string * (module Game_mode)
+              ; mode : MODE_list.t
               }
 
 let real_ai_of_player_config p c =
@@ -27,7 +27,7 @@ let config_change_player p c n =
   | White -> {c with white = n}
   | Black -> {c with black = n}
 let config_flip_player p c =
-  match realai_of_player_config p c with
+  match real_ai_of_player_config p c with
   | Real -> config_change_player p c AI
   | AI   -> config_change_player p c Real
 
@@ -46,22 +46,22 @@ let initmenu () : config option =
           (Break(None))
       | `Config ->
         (* clicking on an item flips the value Real <-> AI*)
-        let player_opt x =
+        let player_opt p =
           (string_of_player p ^ ": " ^
            string_of_real_ai (real_ai_of_player_config p c)),
           Cont(`Config, config_flip_player p c) in
         menu "Configuration"
           [ player_opt White
           ; player_opt Black
-          ; ("GUI: " ^ fst (get_gui ())), Cont(`GUI, c)
-          ; ("Game Mode: " ^ fst c.mode), Cont(`Mode, c)
+          ; ("GUI: " ^ string_of_gui (get_gui ())), Cont(`GUI, c)
+          ; ("Game Mode: " ^ string_of_mode c.mode), Cont(`Mode, c)
           ; "Back", Cont(`Start, c)
           ]
           (Cont(`Start, c))
       | `GUI ->
         (* menu to select gui *)
         let gui =
-          menu ("GUI: " ^ fst (get_gui ()))
+          menu ("GUI: " ^ string_of_gui (get_gui ()))
             (List.map (fun g -> (string_of_gui g, g)) gui_list)
             (get_gui ()) in
         (* switches to that gui *)
@@ -73,7 +73,7 @@ let initmenu () : config option =
         Cont(`Config,
              {c with
               mode =
-                menu ("Game Mode: " ^ fst c.mode)
+                menu ("Game Mode: " ^ string_of_mode c.mode)
                   (List.map (fun m -> (string_of_mode m, m)) mode_list)
                   (get_mode ())
              })

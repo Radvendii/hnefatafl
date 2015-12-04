@@ -7,7 +7,7 @@ type t = string * (module GUI)
 
 let default_gui = "3D", (module ThreeD.GUI : GUI)
 
-let modref = ref(fst default_gui, module (snd default_gui) : GUI)
+let modref = ref(default_gui)
 
 let get_gui () = !modref
 

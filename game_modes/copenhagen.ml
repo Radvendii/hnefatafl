@@ -334,6 +334,6 @@ module Mode : Game_mode = struct
                 c = ((fst b.dims)-1,(snd b.dims)-1) ||
                 c = (0,(snd b.dims)-1)
                 then Some White
-                else if List.length valid_moves c b = 0 then Some Black
+                else if List.length (valid_moves c b) = 0 then Some Black
                 else None
 end

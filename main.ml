@@ -7,13 +7,6 @@ open MODE_list.Mode
 open MODE_list
 open Menu
 
-  let valid_move c1 c2 b =
-    List.mem c2 (valid_moves c1 b) &&
-    match piece_at c1 b with
-    | None -> false
-    | Some BPawn -> b.turn = Black
-    | _ -> b.turn = White
-
 let () =
   (* initialize graphics library *)
   init () ;
@@ -34,7 +27,7 @@ let () =
               match
                 (
                   (* generate the new board from the returned action*)
-                  board_gen
+                  board_gen b
                     (
                       (* if this turn belongs to a player *)
                     if (real_ai_of_player b.turn = Real)

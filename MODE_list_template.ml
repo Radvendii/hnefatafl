@@ -5,9 +5,11 @@ open Game_mode
 open Game_types
 open Helpers
 
+type t = string * (module Game_mode)
+
 let default_mode = "CS3110", (module Default.Mode : Game_mode)
 
-let modref = ref(fst default_mode, module (snd default_mode) : GUI)
+let modref = ref(default_mode)
 
 let get_mode () = !modref
 

@@ -5,9 +5,11 @@ open Game_mode
 open Game_types
 open Helpers
 
+type t = string * (module Game_mode)
+
 let default_mode = "CS3110", (module Default.Mode : Game_mode)
 
-let modref = ref(fst default_mode, module (snd default_mode) : GUI)
+let modref = ref(default_mode)
 
 let get_mode () = !modref
 
@@ -38,6 +40,15 @@ module Mode : Game_mode = struct
     Mod.player_won b
 end
 
+  let valid_move c1 c2 b =
+    let module Mod = (val modval (): Game_mode) in
+    let open Mod in
+    List.mem c2 (valid_moves c1 b) &&
+    match piece_at c1 b with
+    | None -> false
+    | Some BPawn -> b.turn = Black
+    | _ -> b.turn = White
+
 (* calculate the next board state given an attempted move
  * integrating all of the Game_mode functions
  * of the currently loaded Game_mode module
@@ -46,23 +57,30 @@ let board_gen (b:board) (a:action) : board option =
   let module Mod = (val modval (): Game_mode) in
   let open Mod in
   match a with
-            | Move(c1, c2) ->
-                  { b with
-                    turn = next_turn b.turn ;
-                    pieces =
-                      let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
-                      let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
-                      match p1 with
-                      | None -> failwith "checked for in valid_move"
-                      | Some(p1') ->
-                        (* move the piece!*)
-                        let nps = (fst p1', c2)::ps' in
-                        (* remove captured pieces *)
-                        let rps = piece_taken c2 {b with pieces = nps} in
-                        List.filter (fun x -> not @@ List.mem (snd x) rps) nps
-                  }
-            | Nop -> b
-            | Quit -> None
+  | Move(c1, c2) ->
+    if not @@ valid_move c1 c2 b then Some(b)
+    else
+      let (pieces, p, n_taken) =
+        let ps, p1 = pop_find (fun (_,c) -> c = c1) b.pieces in
+        let ps', _ = pop_find (fun (_,c) -> c = c2) ps in
+        match p1 with
+        | None -> failwith "checked for in valid_move"
+        | Some(p1') ->
+          (* move the piece!*)
+          let nps = (fst p1', c2)::ps' in
+          (* remove captured pieces *)
+          let rps = piece_taken c2 {b with pieces = nps} in
+          (List.filter (fun x -> not @@ List.mem (snd x) rps) nps,
+           player_of_piece(fst p1'),
+           List.length rps) in
+      Some { b with
+             turn = other_player b.turn ;
+             pieces = pieces;
+             captured = if p = Black then (n_taken + fst b.captured, snd b.captured)
+               else (fst b.captured, n_taken + snd b.captured)
+           }
+  | Nop -> Some(b)
+  | Quit -> None
 
 let mode_list =
   [ "copenhagen", (module Copenhagen.Mode : Game_mode)

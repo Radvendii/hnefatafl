@@ -1,5 +1,5 @@
 open GUI
-module type GUI_list = sig
+
   type t
   (* A list of possible guis *)
   val gui_list : t list
@@ -24,4 +24,3 @@ module type GUI_list = sig
   (* this is how the loaded gui's functions are accessed.
    * just use this module as that gui. *)
   module GUI : GUI
-end
