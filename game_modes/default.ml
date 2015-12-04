@@ -66,16 +66,16 @@ module Mode : Game_mode = struct
     |None -> []
     |Some BPawn -> []
     |Some WPawn -> begin
-        match piece_at (step_two_dir dir c) b with
-        |None -> []
-        |Some BPawn -> [step_dir dir c]
-        |Some WPawn -> []
-        |Some WKing -> []
+      match piece_at (step_two_dir dir c) b with
+      |None -> []
+      |Some BPawn -> [step_dir dir c]
+      |Some WPawn -> []
+      |Some WKing -> []
       end
     |Some WKing -> begin
-        match make_cross dir c b with
-        |(Some BPawn, Some BPawn, Some BPawn) -> [step_dir dir c]
-        |_ -> []
+      match make_cross dir c b with
+      |(Some BPawn, Some BPawn, Some BPawn) -> [step_dir dir c]
+      |_ -> []
       end
 
   (*Capturing of pieces,
@@ -91,15 +91,6 @@ module Mode : Game_mode = struct
     |Some WPawn ->
       List.flatten @@ List.map (fun d -> check_capture_wpawn d (x,y) b)
         [Up; Down; Left; Right]
-
-  (*return the coordinates of the WKing on the board
-   *Returns None if the king is no longer in play
-  *)
-  let rec find_wking (b:board) : coord option =
-    match b.pieces with
-    |[] -> None
-    |(WKing, (x,y))::ps -> Some (x,y)
-    |p::ps -> find_wking {b with pieces = ps}
 
   (*Naive implementation of winning.
    *Black wins if the White King was captured
@@ -120,7 +111,10 @@ module Mode : Game_mode = struct
       else [] in
     (match piece_at c1 b with
      | None -> (fun _ -> [])
-     | Some(WKing) -> List.filter (fun (x,y) -> (x - (fst c1) <= 3) && ((fst c1) - x <= 3) && (y - (snd c1) <= 3) && ((snd c1) - y <= 3))
+     | Some(WKing) -> List.filter (fun (x,y) -> (x - (fst c1) <= 3) &&
+                                                ((fst c1) - x <= 3) &&
+                                                (y - (snd c1) <= 3) &&
+                                                ((snd c1) - y <= 3))
      | _ -> (fun x -> x)) @@
     List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
 end

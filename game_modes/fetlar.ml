@@ -3,16 +3,16 @@ open Game_types
 open Game_mode
 
 (*FETLAR GAME_MODE with:
- *default setups of 11x11 board *
- *attackers move first *
+ *default setups of 11x11 board
+ *attackers move first
  *restricted squares = throne, 4 corners
- *no pawn can occupy a restricted square *
- *corner squares are hostile to all pieces *
- *throne always hostile to attackers *
- *throne hostile to defenders when empty *
- *all pieces can move any number of spaces *
- *king may take part in captures *
- *King must move to any of the four corners *
+ *no pawn can occupy a restricted square
+ *corner squares are hostile to all pieces
+ *throne always hostile to attackers
+ *throne hostile to defenders when empty
+ *all pieces can move any number of spaces
+ *king may take part in captures
+ *King must move to any of the four corners
  *attackers win if they capture king before escape
  *king capture on all four sides or 3 sides and throne
  *king cannot be captured on the edge
@@ -138,15 +138,6 @@ module Mode : Game_mode = struct
       List.flatten @@ List.map (fun d -> check_capture_wpawn d (x,y) b)
         [Up; Down; Left; Right]
 
-  (*return the coordinates of the WKing on the board
-   *Returns None if the king is no longer in play
-  *)
-  let rec find_wking (b:board) : coord option =
-    match b.pieces with
-    |[] -> None
-    |(WKing, (x,y))::ps -> Some (x,y)
-    |p::ps -> find_wking {b with pieces = ps}
-
   let player_won (b:board) : player option =
     match find_wking b with
     |None -> Some Black
@@ -173,10 +164,4 @@ module Mode : Game_mode = struct
                                  c <> (fst b.dims/2, snd b.dims/2)))
     @@
     List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
-
-  let valid_move c1 c2 b =
-    match piece_at c1 b with
-    |None -> false
-    |Some BPawn -> b.turn = Black && List.mem c2 (valid_moves c1 b)
-    |_ -> b.turn = White && List.mem c2 (valid_moves c1 b)
 end
