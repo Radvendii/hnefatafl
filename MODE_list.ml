@@ -35,9 +35,10 @@ module Mode : Game_mode = struct
     Mod.player_won b
 end
 
-let default_mode = "default", (module Default.Mode : Game_mode)
+let default_mode = "CS3110", (module Default.Mode : Game_mode)
 
 let mode_list =
-  [ "default", (module Default.Mode : Game_mode)
+  [ "copenhagen", (module Copenhagen.Mode : Game_mode)
+  ; "default", (module Default.Mode : Game_mode)
   ; "fetlar", (module Fetlar.Mode : Game_mode)
   ]
