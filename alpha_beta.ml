@@ -16,7 +16,7 @@ let rec find_wking (b:board) : coord option =
 
 let white_util (b:board) : int =
  match (find_wking b) with
-  | None -> failwith "No King. This isnt a fucking democracy. White Looses"
+  | None -> failwith "No King. This isnt a fucking democracy. White Loses"
   | Some (x,y) ->
                   if (x = (fst b.dims)/2) &&
                      (y = (snd b.dims)/2) then 0

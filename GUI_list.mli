@@ -16,7 +16,7 @@ module type GUI_list = sig
   val string_of_gui : t -> string
 
   (* returns the actual module behind a gui *)
-  val module_of_gui : t -> (module Game_mode)
+  val module_of_gui : t -> (module GUI)
 
   (* sets the module GUI to run the gui passed in *)
   val set_gui : t -> unit
