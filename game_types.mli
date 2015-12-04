@@ -28,3 +28,5 @@ type action =
   | Quit
   | Move of (coord * coord)
   | Nop
+
+val find_wking : board -> coord option

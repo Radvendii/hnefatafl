@@ -19,6 +19,13 @@ type action =
   | Move of (coord * coord)
   | Nop
 
+let rec find_wking (b:board) : coord option =
+  match b.pieces with
+  |[] -> None
+  |(WKing, (x,y))::ps -> Some (x,y)
+  |p::ps -> find_wking {b with pieces = ps}
+
+
 let rec piece_at c b =
   match b.pieces with
   | [] -> None

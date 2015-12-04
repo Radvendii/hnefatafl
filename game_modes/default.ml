@@ -1,3 +1,6 @@
+(*
+   NAME: CS3110
+*)
 open Helpers
 open Game_types
 open Game_mode
@@ -29,8 +32,8 @@ module Mode : Game_mode = struct
 
         @
         List.map (List.map (fun c -> WPawn, c))
-          [ List.filter ((<>)(5,5)) (prod (2--6) [4])
-          ; List.filter ((<>)(5,5)) (prod [4] (2--6))
+          [ List.filter ((<>)(4,4)) (prod (2--6) [4])
+          ; List.filter ((<>)(4,4)) (prod [4] (2--6))
           ]
 
         @
