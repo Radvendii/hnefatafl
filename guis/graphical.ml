@@ -109,31 +109,29 @@ module GUI : GUI = struct
   type guistate = { selected : (piece * coord) option
                   ; board    : board}
 
+  let size {dims=(w,h);_} = max w h
+  let turn_indic_len = 20
+  (* length of one side of the drawing area.
+   * the margin is 1 / 20 of the smallest side
+   * leave room at the bottom for drawing whose turn it is *)
+  let draw_len () =
+    min
+      (size_x () * 19 / 20)
+      ((size_y () - (turn_indic_len + 20)) * 19 / 20)
+  (* bottom corner of the drawing area *)
+  let start_draw_x () = (size_x () - draw_len ()) /2
+  let start_draw_y () = (size_y () - draw_len ()) /2
+  (* side length for board squares *)
+  let side_len b = draw_len () / size b
+  (* calculate screen position for a board square *)
+  let calc_x b x = start_draw_x () + side_len b * x
+  let calc_y b x = start_draw_y () + side_len b * x
+  (* calculate board square from a screen position *)
+  let calc_inv_x b x = (x - start_draw_x ()) / side_len b
+  let calc_inv_y b y = (y - start_draw_y ()) / side_len b
 
-  let board b =
-    let (w,h) = b.dims in
-    let size = max w h in
-    let turn_indic_len = 20 in
-    (* length of one side of the drawing area.
-     * the margin is 1 / 20 of the smallest side
-     * leave room at the bottom for drawing whose turn it is *)
-    let draw_len () =
-      min
-        (size_x () * 19 / 20)
-        ((size_y () - (turn_indic_len + 20)) * 19 / 20) in
-    (* side length for board squares *)
-    let side_len () = draw_len () / size in
-    (* bottom corner of the drawing area *)
-    let start_draw_x () = (size_x () - draw_len ()) /2 in
-    let start_draw_y () = (size_y () - draw_len ()) /2 in
-    (* calculate screen position for a board square *)
-    let calc_x x = start_draw_x () + side_len () * x in
-    let calc_y x = start_draw_y () + side_len () * x in
-    (* calculate board square from a screen position *)
-    let calc_inv_x x = (x - start_draw_x ()) / side_len () in
-    let calc_inv_y y = (y - start_draw_y ()) / side_len () in
-
-    let draw_board b' =
+    let draw_board b =
+      let (w,h) = b.dims in
       (* draw board square *)
       set_color 0x808080;
       fill_rect (start_draw_x ()) (start_draw_y ()) (draw_len ()) (draw_len ());
@@ -141,24 +139,28 @@ module GUI : GUI = struct
       set_color 0x909090;
       List.iter (fun (i,j) ->
           draw_rect
-            (calc_x i)
-            (calc_y j)
-            (side_len ())
-            (side_len ())
+            (calc_x b i)
+            (calc_y b j)
+            (side_len b)
+            (side_len b)
         ) (prod (0 -- (w-1)) (0 -- (h-1)));
       set_color black;
       (* draw pieces *)
-      List.iter (fun (p, (i,j)) -> draw_piece p (calc_x i) (calc_y j) (side_len ()) (side_len ())) b'.pieces;
+      List.iter (fun (p, (i,j)) ->
+          draw_piece p (calc_x b i) (calc_y b j) (side_len b) (side_len b))
+        b.pieces;
       (* draw current turn *)
       let piece_of_player = function
         | White -> WPawn
         | Black -> BPawn in
       moveto (start_draw_x ()) (start_draw_y () - turn_indic_len);
       draw_string "Turn: ";
-      draw_piece (piece_of_player b.turn) (current_x ()) (current_y () - 5) (turn_indic_len) (turn_indic_len) in
+      draw_piece (piece_of_player b.turn)
+        (current_x ()) (current_y () - 5) (turn_indic_len) (turn_indic_len)
 
     (* handle click part of click-and-drag of pieces. Also quitting *)
     let handle_selection s =
+      let b = s.board in
       (* finish drawing the board *)
       synchronize ();
       match key_pressed () with
@@ -168,25 +170,29 @@ module GUI : GUI = struct
         match button_pressed () with
         | None -> Cont(s)
         | Some(x,y) ->
-          (match pop_find (fun (_,c) -> c = (calc_inv_x x, calc_inv_y y) ) b.pieces with
+          (match pop_find
+                   (fun (_,c) -> c = (calc_inv_x b x, calc_inv_y b y) )
+                   b.pieces with
            (* someone selects an empty square or somewhere off the board *)
            | (_, None)      -> Cont(s)
            | (ps,Some(p,c)) -> Cont({ selected = Some(p,c)
-                                    ; board = {b with pieces = ps}})) in
+                                    ; board = {b with pieces = ps}}))
 
     (* handle drag part of click-and-drag of pieces *)
     let handle_piece_move s p c =
+      let b = s.board in
       let (x,y) = mouse_pos () in
       if button_down () (* still click-dragging? *)
       then
-        ((draw_piece p x y (side_len ()) (side_len ()));
-         (* finish drawing the board with the piece floating at the mouse cursor *)
+        ((draw_piece p x y (side_len b) (side_len b));
+         (* finish drawing the board with the piece
+          * floating at the mouse cursor *)
          synchronize ();
          Cont(s))
       else
-        Break(Move(c, (calc_inv_x x, calc_inv_y y))) in
+        Break(Move(c, (calc_inv_x b x, calc_inv_y b y)))
 
-    (* board b *)
+  let board b =
     loop_while (fun s ->
         clear_graph ();
         draw_board s.board;
@@ -212,7 +218,8 @@ module GUI : GUI = struct
         strs in
     List.mapi (fun i s ->
         let (sw,sh) = text_size s in
-        (* title gets a perfectly fit box, all menu items get the same size box *)
+        (* title gets a perfectly fit box,
+         * all menu items get the same size box *)
         let (bw,bh) = if i = 0 then (sw,sh) else str_bound in
         let (bw,bh) = (bw + 10, bh + 10) in
         (* position the box in the middle of the screen *)

@@ -154,8 +154,8 @@ module GUI : GUI = struct
     );
     GlDraw.ends ()
 
-  let draw_board s =
-    let b = s.board in
+  let draw_board ?(selected=None) b =
+    clear_3D ();
     let (w,h) = b.dims in
     let size = max w h in
     (* draw 2D squares slightly above the board and pointing up *)
@@ -199,7 +199,7 @@ module GUI : GUI = struct
      * this must be done *before* any
      * pieces are drawn so that it will actually light them up
      * (stupid imperative state) *)
-    (match s.selected with
+    (match selected with
      | Some(i,j) ->
        transform_to_square (i,j);
        Gl.enable `light3;
@@ -252,7 +252,7 @@ module GUI : GUI = struct
          * also a slightly different color
          * because glowing black pieces look
          * AWFUL *)
-        (if s.selected = Some(i,j)
+        (if selected = Some(i,j)
          then
            (GlLight.material `both (`emission (0.0,0.0,0.2,1.0));
             draw_piece true p)
@@ -321,8 +321,7 @@ module GUI : GUI = struct
 
   let board b =
     loop_while (fun s ->
-        clear_3D ();
-        draw_board s;
+        draw_board ~selected:s.selected s.board;
         match key_pressed () with
         | None -> Cont(s)
         | Some(k) -> process_guiaction (guiaction_of_key k s) s
@@ -341,4 +340,8 @@ module GUI : GUI = struct
     r
 
   let display_win p = menu (string_of_player p ^ " wins!") ["play again", ()] ()
+
+  (* OCaml can't figure out optional parameters don't restrict the type,
+   * so make OCaml happy *)
+  let draw_board b= draw_board b
 end

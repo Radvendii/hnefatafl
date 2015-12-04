@@ -39,7 +39,7 @@ let initmenu () : config option =
       match m with
       | `Start ->
         menu "Hnefatafl"
-          [ "Start Game",    Break(Some(c))
+          [ "Start Game", Break(Some(c))
           ; "Configuration", Cont(`Config, c)
           ; "Quit", Break(None)
           ]

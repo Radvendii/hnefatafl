@@ -34,7 +34,9 @@ let () =
                     (* then prompt the player *)
                     then board b
                     (* otherwise give it to the AI *)
-                    else Alpha_beta.board b
+                    else
+                      (draw_board b;
+                       Alpha_beta.board b)
                     )
                 )
               with

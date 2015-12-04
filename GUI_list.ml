@@ -33,6 +33,9 @@ module GUI : GUI = struct
   let board b =
     let module Mod = (val modval () : GUI) in
     Mod.board b
+  let draw_board b =
+    let module Mod = (val modval () : GUI) in
+    Mod.draw_board b
   let menu t os d =
     let module Mod = (val modval () : GUI) in
     Mod.menu t os d

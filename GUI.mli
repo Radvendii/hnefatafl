@@ -12,6 +12,11 @@ module type GUI = sig
    * input *)
   val board : board -> action
 
+  
+  (* [draw_board b] presents the board to the ser. It does not ask for 
+   * any input though *)
+  val draw_board : board -> unit
+
   (* [menu title ms def] presents the string part of ms as menu options
    * to a menu named [title] and prompts the user to select an option.
    * It then returns the 'a part of the menu option that is selected,
