@@ -2,6 +2,12 @@ open GUI
 open Game_types
 open MODE_list
 
+let board_gen b a =
+  match board_gen b a with
+  | None -> failwith "AI should not be trying to Quit"
+  | Some(b) -> b
+
+
 let rec find_wking (b:board) : coord option =
   match b.pieces with
   |[] -> None
