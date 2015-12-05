@@ -30,13 +30,13 @@ let () =
                   board_gen b
                     (
                       (* if this turn belongs to a player *)
-                    if (real_ai_of_player b.turn = Real)
-                    (* then prompt the player *)
-                    then board b
-                    (* otherwise give it to the AI *)
-                    else
-                      (draw_board b;
-                       Alpha_beta.board b)
+                      if (real_ai_of_player b.turn = Real)
+                      (* then prompt the player *)
+                      then board b
+                      (* otherwise give it to the AI *)
+                      else
+                        (draw_board b;
+                         Alpha_beta.board b)
                     )
                 )
               with
