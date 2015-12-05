@@ -29,8 +29,10 @@ module GUI : GUI = struct
       (* prevents from deinitializing more than once *)
       if !initialized
       then
-        (Sdl.quit ();
-         initialized := false)
+        ( Sdlevent.add [Sdlevent.QUIT]
+        ; Sdltimer.delay 150
+        ; Sdl.quit ()
+        ; initialized := false)
       else ()
 
     let init w h t () =
