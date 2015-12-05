@@ -29,6 +29,8 @@ module GUI : GUI = struct
       (* prevents from deinitializing more than once *)
       if !initialized
       then
+        (* give the event-processing thread a chance to
+         * close *)
         ( Sdlevent.add [Sdlevent.QUIT]
         ; Sdltimer.delay 150
         ; Sdl.quit ()
@@ -44,6 +46,9 @@ module GUI : GUI = struct
       Thread.create
         (loop_while (fun () ->
              let open Sdlevent in
+             (* I'm not sure if this try-with block is necessary
+              * I put it in a whole bunch of measures to ensure
+              * this thread doesn't fail *)
              try
                (
                  match wait_event () with
