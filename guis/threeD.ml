@@ -190,7 +190,15 @@ module GUI : GUI = struct
       GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
       match piece_at c b with
       | None -> ()
-      | Some(p) -> draw_piece ~alpha:0.8 p);
+      | Some(p) ->
+        (
+          (* indicate if the given move is valid *)
+          if MODE_list.valid_move c !cursor b || c = !cursor
+          then GlLight.material `both (`emission (0.02,0.1,0.02,1.0))
+          else GlLight.material `both (`emission (0.1,0.02,0.02,1.0))
+        );
+        draw_piece ~alpha:0.8 p);
+    GlLight.material `both (`emission (0.0,0.0,0.0,0.0));
 
     (* draw game board *)
     GlMat.mode `modelview;

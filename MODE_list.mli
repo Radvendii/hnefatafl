@@ -26,6 +26,10 @@ val set_mode : t -> unit
  * just use this module as that gui. *)
 module Mode : Game_mode
 
+(* [valid_move c1 c2 b] is whether the piece at [c1] can move
+ * to [c2] on board [b] *)
+val valid_move : coord -> coord -> board -> bool
+
 (* calculate the next board state given an attempted action
  * integrating all of the functions
  * of the currently loaded game mode
