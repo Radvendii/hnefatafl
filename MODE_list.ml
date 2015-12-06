@@ -29,6 +29,9 @@ module Mode : Game_mode = struct
   let init_board () =
     let module Mod = (val modval () : Game_mode) in
     Mod.init_board ()
+  let win_squares () =
+    let module Mod = (val modval () : Game_mode) in
+    Mod.win_squares ()
   let valid_moves c b =
     let module Mod = (val modval () : Game_mode) in
     Mod.valid_moves c b

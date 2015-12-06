@@ -36,6 +36,8 @@ module Mode : Game_mode = struct
     ; turn = Black
     ; captured = (0,0)}
 
+  let win_squares () = [(0,0);(0,10);(10,0);(10,10)]
+
   let rec shieldwall_helper_black dir dir1 cOrig c1 c2 b :(bool * (coord list)) =
     let a = piece_at (step_dir dir cOrig) b in
     let c = piece_at (step_dir dir1 cOrig) b in
@@ -242,5 +244,10 @@ module Mode : Game_mode = struct
                 c = ((fst b.dims)-1,(snd b.dims)-1) ||
                 c = (0,(snd b.dims)-1)
                 then Some White
-                else None
+                else let blacks = List.filter (fun (p,c) -> p = BPawn) b.pieces in
+                 if List.length blacks = 0 then Some White
+                else let whites = List.filter (fun (p,c) -> p = WPawn) b.pieces in
+                 if List.length whites = 0 && List.length (valid_moves c b) = 0
+                 then Some Black
+              else None
 end

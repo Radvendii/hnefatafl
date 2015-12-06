@@ -43,6 +43,8 @@ module Mode : Game_mode = struct
     ; turn = Black
     ; captured = (0,0)}
 
+  let win_squares () = [(0,0);(0,10);(10,0);(10,10)]
+
   let check_capture_wpawn (dir:direction) (c:coord) (b:board) : coord list =
     match piece_at (step_dir dir c) b with
     |None -> []
@@ -138,16 +140,6 @@ module Mode : Game_mode = struct
       List.flatten @@ List.map (fun d -> check_capture_wpawn d (x,y) b)
         [Up; Down; Left; Right]
 
-  let player_won (b:board) : player option =
-    match find_wking b with
-    |None -> Some Black
-    |Some c -> if c = (0,0) ||
-                  c = ((fst b.dims)-1,0) ||
-                  c = ((fst b.dims)-1,(snd b.dims)-1) ||
-                  c = (0,(snd b.dims)-1)
-      then Some White
-      else None
-
   let valid_moves c1 b =
     let rec helper c2 dir =
       let c2' = step_dir dir c2 in
@@ -164,4 +156,19 @@ module Mode : Game_mode = struct
                                  c <> (fst b.dims/2, snd b.dims/2)))
     @@
     List.flatten @@ List.map (helper c1) [Up; Down; Left; Right;]
+
+  let player_won (b:board) : player option =
+    match find_wking b with
+    |None -> Some Black
+    |Some c -> if c = (0,0) ||
+                  c = ((fst b.dims)-1,0) ||
+                  c = ((fst b.dims)-1,(snd b.dims)-1) ||
+                  c = (0,(snd b.dims)-1)
+      then Some White
+      else let blacks = List.filter (fun (p,c) -> p = BPawn) b.pieces in
+       if List.length blacks = 0 then Some White
+      else let whites = List.filter (fun (p,c) -> p = WPawn) b.pieces in
+       if List.length whites = 0 && List.length (valid_moves c b) = 0
+       then Some Black
+      else None
 end

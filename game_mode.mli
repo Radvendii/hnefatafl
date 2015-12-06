@@ -16,4 +16,7 @@ module type Game_mode = sig
   (* [player_won b] is the player that has won when the board is in
    * position [b] or None if no player has won in that configuration*)
   val player_won  : board -> player option
+
+  (* returns the winning locations of the king in this game mode*)
+  val win_squares : unit -> coord list
 end
