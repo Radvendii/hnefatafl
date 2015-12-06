@@ -136,15 +136,6 @@ diagram.
     may or may not end up in the final version}
 \end{figure}
 
-\subsection{GUI}
-Two options of GUI modules: Text-based and graphical.\\
-The purpose of this module is to enable interaction between the user and the
-backend. The GUI does none of the game or board computations. It only has
-knowledge of the screen state, and what the backend tells it to print. It
-\textbf{is} in charge of interpreting piece movement by the user. That is, it
-does not report every keystroke, mouseclick, etc. the user makes, only what move
-the user would like to make.
-
 \subsection{Main}
 Main is in charge of the following tasks:
 \begin{itemize}
@@ -186,23 +177,6 @@ GameType includes basic types for the board, pieces on the board, and other
 game-state related objects. It also includes small helper functions that relate
 to those types. (e.g. piece\_at for the piece at a location on the board)
 
-\subsection{GameModes?}
-We have two ideas for how to implement variants on the game mode (e.g.
-differences in win conditions, valid movements, etc.). One involves dynamically
-loading one of a set of module that will contain functions for these aspects of
-the game.\\
-The alternative would be to load preferences out of a plain text file.\\\\
-\textit{Pros/Cons:}
-\begin{description}
-\item[+] Doesn't require us to write text parsing code
-\item[+] More flexible (can run arbitrary code)
-\item[-] Less secure (can run arbitrary code)
-\item[-] Dynamically loading modules is awkward
-\end{description}
-
-\section{Module Design}
-See attached .mli files.
-
 \section{Data}
 Structures include:
 \begin{itemize}
@@ -234,14 +208,6 @@ data.
 
 \section{Testing Plan}
 \begin{itemize}
-\item Write unit tests for state of the board after certain moves
-  \begin{itemize}
-  \item Valid moves
-  \item Invalid moves
-  \item Win conditions
-  \item Piece removal conditions
-  \item All of these, in various game modes
-  \end{itemize}
 \item Watch the AI play against itself
 \item Get play testers
 \end{itemize}
@@ -249,31 +215,37 @@ data.
 \section{Division of Labor}
 \begin{itemize}
 \item Joseph
+  \begin{itemize}
+    \item Artificial Intelligence
+    \begin{itemize}
+      \item AI optimization
+      \item Neural networks
+      \item Heuristic function
+      \item Testing
+    \end{itemize}
+    \item Blender piece design
+  \end{itemize}
 \item Taeer
   \begin{itemize}
   \item Fetlar.ml
     \begin{itemize}
     \item Initial board setup
     \end{itemize}
+  \item Complete work on the four GUIs
+  \item Integration of Menus
+  \item Loading of game modes, AI, and GUIs from menu selections
+  \item Testing
   \end{itemize}
 \item Elizabeth
   \begin{itemize}
+  \item Testing
   \item Prepared final Design Document
-  \item Default.ml
+  \item Game Modes
     \begin{itemize}
     \item Winning conditions
-    \item Capturing pieces
-    \item Initial board setup
-    \end{itemize}
-  \item Fetlar.ml
-    \begin{itemize}
-    \item Winning conditions
-    \item Capturing pieces
-    \end{itemize}
-  \item Copenhagan.ml
-    \begin{itemize}
-    \item Winning conditions
-    \item Capturing pieces
+    \item Capture specifics
+    \item Valid move specifics
+    \item Board initializations
     \end{itemize}
   \end{itemize}
 \end{itemize}
