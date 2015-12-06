@@ -150,6 +150,10 @@ module GUI : GUI = struct
     GlDraw.ends ()
 
   let draw_board ?(selected=None) b =
+    GlClear.color
+      (match b.turn with
+        | White -> (0.8,0.8,0.8)
+        | Black -> black_color);
     clear_3D ();
     let (w,h) = b.dims in
     let size = max w h in
