@@ -191,26 +191,6 @@ module GUI : GUI = struct
       GlMat.translate3 (scale /. 2., scale /. 2., 0.);
       GlMat.scale3 (scale, scale, scale) in
 
-    transform_to_square !cursor;
-    draw_cursor ();
-
-    (match selected with
-    | None -> Gl.disable `blend;
-    | Some(c) ->
-      Gl.enable `blend;
-      GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
-      match piece_at c b with
-      | None -> ()
-      | Some(p) ->
-        (
-          (* indicate if the given move is valid *)
-          if MODE_list.valid_move c !cursor b || c = !cursor
-          then GlLight.material `both (`emission (0.02,0.1,0.02,1.0))
-          else GlLight.material `both (`emission (0.1,0.02,0.02,1.0))
-        );
-        draw_piece ~alpha:0.8 p);
-    GlLight.material `both (`emission (0.0,0.0,0.0,0.0));
-
     (* draw game board *)
     GlMat.mode `modelview;
     GlMat.load_identity ();
@@ -245,12 +225,34 @@ module GUI : GUI = struct
           )
       ) (prod (0 -- w) (0 -- h));
 
+
+    transform_to_square !cursor;
+    draw_cursor ();
+
+    (match selected with
+    | None -> Gl.disable `blend;
+    | Some(c) ->
+      Gl.enable `blend;
+      GlFunc.blend_func ~src:`src_alpha ~dst:`one_minus_src_alpha;
+      match piece_at c b with
+      | None -> ()
+      | Some(p) ->
+        (
+          (* indicate if the given move is valid *)
+          if MODE_list.valid_move c !cursor b || c = !cursor
+          then GlLight.material `both (`emission (0.0,0.1,0.0,1.0))
+          else GlLight.material `both (`emission (0.2,0.0,-0.3,1.0))
+        );
+        draw_piece ~alpha:0.8 p);
+    GlLight.material `both (`emission (0.0,0.0,0.0,0.0));
+
     (* draw pieces *)
     List.iter (fun (p, (i,j)) ->
         transform_to_square (i,j);
         (if selected = Some(i,j)
          then draw_piece ~alpha:0.5
          else draw_piece ~alpha:1.0) p;
+        GlLight.material `both (`shininess 0.0)
       ) b.pieces;
     Gl.flush ();
     Sdlgl.swap_buffers ()
