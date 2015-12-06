@@ -96,21 +96,52 @@ Main mechanics of Copenhagan:
 
 
 \section{Interface:}
-There are three possible GUIs that the user can decide between at runtime.  They include a text-based interface, a 2D interface, and a 3D interface.  They are described below.  Every GUI includes the command that q and esc are quit.  This means quitting up to a higher level menu. If you quit a game, there is no way to re-enter it.  It is important to use the q and esc keys when quitting a GUI because they are pre-programmed to exit gracefully.  Users that do not use these keys will see errors in their terminal.
+There are four possible ``GUI''s (actually just interfaces, but we named
+everything incorrectly. Ah well) that the user can decide between at runtime:
+A command-line interface, a text-based interface, a 2D interface, and a 3D interface.
+described below.  Every GUI includes the command that q and esc are quit.  This
+means quitting up to a higher level menu. If you quit a game, there is no way to
+re-enter it.  It is important to use the q and esc keys when quitting a GUI
+because they are pre-programmed to exit gracefully. Users that do not use these
+keys (e.g. by closing the window) will see errors in their terminal. It turns
+out, windowing libraries don't have an easy way of handling windows closing.
 
+\subsection{Command-line}
+We call this GUI "CLI".  It is in the file named "CLI.ml".
+I am a firm believer that every application should have a command line
+interface so that it is easier to interact with the application
+programmatically.
 \subsection{Text-Based}
-We call this GUI "ascii".  It is in the file named "ascii.ml".  The controls for this GUI are the arrow buttons (or hjkl) to move.  The space bar selects a piece.  The location of the cursor is shown with a blue, highlighted square.  This GUI is implemented using Termbox which takes over the terminal that called the function.
+We call this GUI "ascii".  It is in the file named "ascii.ml".  The controls for
+this GUI are the arrow buttons (or hjkl) to move.  The space bar selects a
+piece.  The location of the cursor is shown with a blue, highlighted square.
+This GUI is implemented using Termbox which takes over the terminal. If your
+terminal is screwed up after an error in the program, this is why. You'll have
+to restart the terminal emulator.
 
 \subsection{2-Dimensional}
-We call this GUI "2D".  It is in the file named "graphical.ml".  The controls for this GUI are clicking and dragging with the mouse.  A selected piece moves with the mouse.  This GUI is implemented using the built-in OCaml graphics library.  It opens a new window.
+We call this GUI "2D".  It is in the file named "graphical.ml".  The controls
+for this GUI are clicking and dragging with the mouse.  A selected piece moves
+with the mouse.  This GUI is implemented using the built-in OCaml graphics
+library and opens a new window.
 
 \subsection{3-Dimensional}
-We call this GUI "3D". It is in the file named "threeD.ml".  The controls for this GUI are arrow keys (and hjkl).  The cursor is shown with a lit tile.  Selection of a piece is done with the space bar.  This GUI is implemented using OpenGL and it opens a new window.
+We call this GUI "3D". It is in the file named "threeD.ml".  The controls for
+this GUI are arrow keys (or hjkl) to move the cursor.  The cursor is shown with a lit tile.
+Selection of a piece is done with the space bar, and a ghost version of the
+piece you selected will follow the cursor. The ghost-piece will be tinged green
+if the move you are making is valid, and red otherwise. (unfortunately, the way
+we implemented the code means that you are able to select a piece when it is not
+that piece's turn, and the ``valid move indicator'' will show that the move is
+valid. You can also select blank squares. The reason for this decision was that
+was didn't want the GUI thinking too much about what was going on in the game,
+since it is just a GUI. We also wanted to limit communication between GUI and
+program logic, so the GUI doesn't communicate anything when a piece is
+\textbf{selected}. If I were redesigning the code, I would relax one of these
+constraints.) This GUI is implemented using OpenGL and it opens a new window.
 
 \section{Artificial Intelligence}
 The AI computes, with no data structure, the optimal move at each turn.  The optimal move is computed using a utility function.  The utility function is dependent on the number of captured pieces and the distance of the white king to the win condition.  White and black actually use the same utility function.  This helps the black team not only capture pieces, but oppose the movement of the white king.  Relating the number of pieces captured to the movement of the king was one design consideration.  If you value the kings movement too highly, the white team AI will rush to the win condition with little consideration for the welfare of its pieces.  If you value the movement too little, the white AI turtles and only defends that king without actively trying to win.  We determined the valuation ratio between a lost piece and movement of the king by having AI with randomly generated constants play against each other and take the best value.  This is an informal version of a neural-network.
-
-\section{Menus}
 
 \section{Architecture}
 \begin{figure}[H]\label{fig:CCD}
@@ -202,8 +233,8 @@ data.
 \section{External Libraries}
 \begin{itemize}
 \item Termbox for creating an ascii board
-\item OpenGL for creating a more graphical gui
-\item Potentially Dynlink for dynamically linking game modes
+\item lablgl for creating a more graphical gui
+\item OcamlSdl for windowing
 \end{itemize}
 
 \section{Testing Plan}
@@ -216,14 +247,14 @@ data.
 \begin{itemize}
 \item Joseph
   \begin{itemize}
-    \item Artificial Intelligence
+  \item Artificial Intelligence
     \begin{itemize}
-      \item AI optimization
-      \item Neural networks
-      \item Heuristic function
-      \item Testing
+    \item AI optimization
+    \item Neural networks
+    \item Heuristic function
+    \item Testing
     \end{itemize}
-    \item Blender piece design
+  \item Blender piece design
   \end{itemize}
 \item Taeer
   \begin{itemize}
@@ -234,6 +265,7 @@ data.
   \item Complete work on the four GUIs
   \item Integration of Menus
   \item Loading of game modes, AI, and GUIs from menu selections
+  \item 3D models and export script from blender
   \item Testing
   \end{itemize}
 \item Elizabeth
