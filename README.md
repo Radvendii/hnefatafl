@@ -1,4 +1,4 @@
-# hnefatafl
+# Hnefatafl
 Final Project for CS3110: Coding Hnefatafl
 
 # Setup
@@ -11,7 +11,7 @@ Compile and Run with the following commands:
 <code>
 cs3110 compile main.ml
 cs3110 run main.ml
-</code
+</code>
 
 # Adding GUIs
 There are a couple of options of interfaces in this project. You can add your own by creating a .ml file in the guis/ subdirectory that exhibits a GUI module with the GUI module type found in GUI.mli. To name your GUI, put a comment at the top that appears exactly as follows:
