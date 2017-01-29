@@ -1,6 +1,25 @@
 # Hnefatafl
 Final Project for CS3110: Coding Hnefatafl
 
+## Screenshots
+The starting layout for the default game mode in the 3D graphics GUI
+![](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/1.png)
+
+Hovering the cursor over a piece:
+![The cursor is a blue light under the piece](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/2.png)
+
+Piece selected:
+![The piece turns translucent](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/3.png)
+
+Hovering over a valid move:
+![A translucent copy of the piece shaded green follows the cursor](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/4.png)
+
+Hovering over an invalid move:
+![The copy of the piece following the cursor turns red](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/5.png)
+
+Move made! Background changes to white to indicat the current turn.
+![](https://raw.githubusercontent.com/Radvendii/hnefatafl/master/imgs/6.png)
+
 # Setup
 Designed to be run on the CS3110 Virtual Machine: http://www.cs.cornell.edu/courses/cs3110/2015fa/vm.html
 
