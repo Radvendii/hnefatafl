@@ -3,6 +3,7 @@ Final Project for CS3110: Coding Hnefatafl
 
 # Setup
 Designed to be run on the CS3110 Virtual Machine: http://www.cs.cornell.edu/courses/cs3110/2016fa/install.html
+
 Run setup.sh in the main folder to install the needed packages.
 
 # Adding GUIs
