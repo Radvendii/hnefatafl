@@ -9,8 +9,7 @@ Run setup.sh in the main folder to install the needed packages.
 Compile and Run with the following commands:
 
 <code>
-cs3110 compile main.ml
-cs3110 run main.ml
+cs3110 compile main.ml && cs3110 run main.ml
 </code>
 
 # Adding GUIs
