@@ -2,9 +2,16 @@
 Final Project for CS3110: Coding Hnefatafl
 
 # Setup
-Designed to be run on the CS3110 Virtual Machine: http://www.cs.cornell.edu/courses/cs3110/2016fa/install.html
+Designed to be run on the CS3110 Virtual Machine: http://www.cs.cornell.edu/courses/cs3110/2015fa/vm.html
 
 Run setup.sh in the main folder to install the needed packages.
+
+Compile and Run with the following commands:
+
+<code>
+cs3110 compile main.ml
+cs3110 run main.ml
+</code
 
 # Adding GUIs
 There are a couple of options of interfaces in this project. You can add your own by creating a .ml file in the guis/ subdirectory that exhibits a GUI module with the GUI module type found in GUI.mli. To name your GUI, put a comment at the top that appears exactly as follows:
